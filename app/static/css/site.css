@@ -1,0 +1,122 @@
+.srg-bg-p {
+    background: red;
+    border: 1px solid orange;
+}
+
+.srg-bg-primary {
+    background: #02308C
+}
+
+.srg-header-secondary {
+    color: #d9d9d9
+}
+
+.srg-header {
+    color: #02308C
+}
+
+.srg-border {
+    border: 1px solid #a9a9a9;
+    border-radius: 12px;
+}
+
+.srg-border-bottom {
+    border-bottom: 1px solid #a9a9a9
+}
+
+.srg-bg-secondary {
+    background: #d9d9d9;
+}
+
+.srg-btn-primary {
+    background-color: #02308C;
+    border: 1px solid #02308C;
+    color: #ffffff;
+    padding: 8px 16px 8px 16px;
+    border-radius: 12px;
+}
+
+.srg-btn-ol-primary {
+    background-color: #d9d9d9;
+    border: 1px solid #02308C;
+    color: #ffffff;
+    padding: 8px 16px 8px 16px;
+    border-radius: 12px;
+}
+
+
+.my-link:hover {
+    text-decoration:underline;
+    box-shadow: 0 0 8px #C3C6D7;
+}
+
+
+.srg-link {
+    color: #02308C;
+    text-decoration: none;
+}
+
+.srg-btn-primary:hover {
+    border: 1px solid #02308C;
+    background: white;
+    color: #02308C
+
+}
+
+.srg-success-button {
+    background-color: #004000;
+    border: 1px solid #004000;
+    color: white;
+    padding:8px 16px 8px 16px;
+    border-radius: 12px;
+}
+
+.srg-success-button:hover {
+    background: #ffffff;
+    border: 1px solid #004000;
+    color: #004000;
+}
+
+.srg-danger-button {
+    background: #8B0000;
+    border: 1px solid #8B0000;
+    color: white;
+    padding:5px 9px 5px 9px;
+    border-radius: 8px
+}
+
+.srg-danger-button:hover {
+    background:#ffffff;
+    border: 1px solid #8B0000;
+    color: #8B0000;
+}
+
+.srg-btn-primary-sm {
+    background-color: #02308C;
+    border: 1px solid #02308C;
+    color: #ffffff;
+    padding: 5px 9px 5px 9px;
+    border-radius: 8px;
+}
+
+.srg-btn-primary-sm:hover {
+    background: #ffffff;
+    border: 1px solid #02308C;
+    color: #02308C;
+}
+
+/*LOGIN CSS*/
+.srg-form-control {
+    background: none;
+    box-shadow: none;
+    outline: none;
+    color: #02308C;
+}
+
+.srg-login-button, .srg-register-button {
+    background: #02308C;
+    border:1px solid #02308C;
+    border-radius: 50px;
+    padding:8px 32px;
+    color: white;
+}

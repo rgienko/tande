@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="row d-flex justify-content-between">
+        <div class="col-6 d-flex align-items-center justify-content-start">
+            <span class="srg-header fs-3">Dashboard - Engagements</span>
+        </div>
+        <div class="col-6 d-flex align-items-center justify-content-end">
+            <a href="{% url 'create-engagement' %}" class="srg-link ">
+                <i class="fs-5 bi bi-plus-square"></i>
+                <span class="ms-2 fs-5"> New Engagement</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-4 col-md-4 overflow-auto">
+            <span class="srg-header fs-3">Current Engagements</span>
+            <table class="table">
+                {% for engagement in all_engagements %}
+                    <tr>
+                        <td>
+                            {{ engagement.srg_id }}<br>
+                            {{ engagement.provider }}<br>
+                            {{ engagement.parent }}<br>
+                            {{ engagement.time_code }}<br>
+                            FYE: {{ engagement.fye|date:'m/d/Y' }}
+
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </table>
+        </div>
+        <div class="col-8 border-start">
+            <span class="srg-header fs-3"> Engagement Details</span>
+        </div>
+    </div>
+
+
+{% endblock %}
