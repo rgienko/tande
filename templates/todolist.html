@@ -1,0 +1,119 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="row d-flex justify-content-between srg-bg-secondary">
+        <div class="col-6 srg-header">
+            <h3 class="fw-normal">{{ user.first_name }}'s To-Do List</h3>
+            <h5 class="fw-normal">Today: {{ today|date:'D m/d/Y' }}</h5>
+            <h5 class="fw-normal">Period: {{ week_beg|date:'D m/d/Y' }} - {{ week_end|date:'D m/d/Y' }}</h5>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-4">
+            <span class="srg-header fs-3">Assigned Engagements</span>
+            <table class="table table-borderless">
+                {% for engagement in assigned_engagements %}
+                    <tr>
+                        <td class="">
+                            <div class="card">
+                                <div class="card-body p-2">
+
+                                    {{ engagement.engagement }}<br>
+                                    {{ engagement.getProvider }}<br>
+                                    {{ engagement.getScope }}<br>
+                                    FYE: {{ engagement.getFYE|date:'m/d/Y' }}
+
+                                </div>
+
+                                <div class="card-footer srg-bg-primary py-2 border-0 text-center">
+                                    <a  class="link-light text-decoration-none open-modal-button"
+                                        id="modal-{{ engagement.engagement }}-modal"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modal-{{ forloop.counter }}"
+                                        data-id="{{ engagement.engagement }}"
+                                        href="#modal-{{ forloop.counter }}-modal"
+                                        aria-controls="{{ engagement.engagement }}">
+
+                                        Add to To-Do List
+
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </table>
+        </div>
+    <div class="col-8">
+        <table class="table table-bordered">
+            <caption>Current To-Do List</caption>
+                <thead>
+                    <tr class="text-center text-light srg-bg-primary border-0">
+                        <th class="border-0">Date</th>
+                        <th class="border-0">Engagement Info</th>
+                        <th class="border-0">Hours</th>
+                        <th class="border-0">Actions</th>
+
+                    </tr>
+                </thead>
+                {% for entry in current_todo_list %}
+                    <tr class="text-center">
+                        <td class="px-0">{{ entry.todo_date|date:'m/d/Y' }}</td>
+                        <td class="text-start">
+                            {{ entry.engagement }}<br>
+                            {{ entry.getProvider }}<br>
+                            {{ entry.getScope }}<br>
+                            FYE: {{ entry.getFYE|date:'m/d/Y' }}<br>
+                        </td>
+                        <td>{{ entry.anticipated_hours }}</td>
+                        <td class="text-center">
+                            <a href="#"><i class="bi bi-pencil-square"></i></a>
+                            <a href="#"><i class="bi bi-trash3"></i></a>
+                            <a class="open-modal-button"
+                                id="modal-{{ entry.srg_id }}-modal"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal-{{ forloop.counter }}"
+                                data-id="{{ entry.srg_id }}"
+                                href="#modal-{{ forloop.counter }}-modal"
+                                aria-controls="{{ entry.srg_id }}">
+                                <i class="bi bi-clock"></i></a>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    </div>
+
+        {% for engagement in assigned_engagements %}
+            <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="modal-{{ engagement.engagement }}-modal" aria-hidden="true">
+                <div class="modal-dialog" id="modal">
+                    <div class="modal-content">
+                        <div class="modal-header srg-bg-primary text-light">
+                            <h4 class="text-light fw-normal mb-0">Add Engagement to To-Do List</h4>
+                        </div>
+                        <div class="modal-body">
+                            <form class="" method="POST">
+                                {% csrf_token %}
+                                    <label for="my-input-{{ forloop.counter }}">Engagement:</label><br>
+                                    <input class="mb-3" name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.engagement }}"/><br>
+                                {% for field in add_todo_form %}
+                                    <div class="fieldWrapper mb-3">
+                                        {{ field.label_tag }} <br>{{ field }}
+                                        {% if field.help_text %}
+                                        <p class="help">{{ field.help_text|safe }}</p>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                                <button class="srg-btn-primary my-2">Add Engagement</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+
+
+{% endblock %}

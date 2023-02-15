@@ -1,0 +1,96 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="row d-flex justify-content-between srg-bg-secondary">
+        <div class="col-6 srg-header">
+            <h3 class="fw-normal">{{ user.first_name }}'s Timesheet</h3>
+            <h5 class="fw-normal">Today: {{ today|date:'D m/d/Y' }}</h5>
+            <h5 class="fw-normal">Week: {{ week_beg|date:'D m/d/Y' }} - {{ week_end|date:'D m/d/Y' }}</h5>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 overflow-auto">
+            <table class="table">
+            <caption>Current Timesheet Entries</caption>
+                <thead>
+                    <tr class="text-center">
+                        <th>Date</th>
+                        <th>Engagement ID</th>
+                        <th>Provider</th>
+                        <th>Scope</th>
+                        <th>Hours</th>
+                        <th>Actions</th>
+
+                    </tr>
+                </thead>
+                {% for entry in timesheet_entries %}
+                    <tr class="text-center align-middle">
+                        <td class="">{{ entry.date|date:'m/d/Y' }}</td>
+                        <td class="">{{ entry.engagement }}</td>
+                        <td class="">{{ entry.getProvider }}</td>
+                        <td class="">{{ entry.getScope }}</td>
+                        <td>{{ entry.hours }}</td>
+                        <td class="text-center">
+                            <a class="open-modal-button text-decoration-none srg-link"
+                                id="modal-{{ entry.srg_id }}-modal"
+                                data-bs-toggle="modal"
+                                data-bs-target="#modal-{{ forloop.counter }}"
+                                data-id="{{ entry.srg_id }}"
+                                href="#modal-{{ forloop.counter }}-modal"
+                                aria-controls="{{ entry.srg_id }}">
+                                <i class="fs-5 bi bi-clock"></i>
+                            </a>
+                            <a class="text-decoration-none srg-link-secondary" href="{% url 'edit-timesheet' entry.timesheet_id %}">
+                                <i class="fs-5 bi bi-pencil-square "></i>
+                            </a>
+
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tfoot>
+                    <tr class="text-center border-0">
+                        <td class="border-0"></td>
+                        <td class="border-0"></td>
+                        <td class="border-0"></td>
+                        <td class="border-0 fw-bolder text-end">Weekly Total:</td>
+                        <td class="border-0 fw-bolder">{{ weekly_total.weekly_hours_total }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        {% for entry in timesheet_entries %}
+            <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="modal-{{ entry.engagement }}-modal" aria-hidden="true">
+                    <div class="modal-dialog" id="modal">
+                        <div class="modal-content">
+                            <div class="modal-header srg-bg-primary text-light">
+                                <h4 class="text-light fw-normal mb-0">Record Hours</h4>
+                            </div>
+                            <div class="modal-body">
+                                ID: <span id="object-id-{{ forloop.counter }}">{{ entry.engagement}}</span>
+
+                                <form class="" method="POST">
+                                    {% csrf_token %}
+                                        <label for="my-input-{{ forloop.counter }}">Engagement:</label><br>
+                                        <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ entry.engagement }}"/><br>
+                                    {% for field in add_time_form %}
+                                        <div class="fieldWrapper mb-3">
+                                            {{ field.label_tag }} <br>{{ field }}
+                                            {% if field.help_text %}
+                                            <p class="help">{{ field.help_text|safe }}</p>
+                                            {% endif %}
+                                        </div>
+
+                                    {% endfor %}
+                                    <button class="srg-btn-primary my-2">Add Hours</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}

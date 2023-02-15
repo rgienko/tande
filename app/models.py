@@ -18,6 +18,9 @@ class Employee(models.Model):
     title = models.CharField(max_length=40)
     rate = models.IntegerField()
 
+    def __str__(self):
+        return self.user.username
+
 
 class Parent(models.Model):
     parent_id = models.CharField(max_length=15, primary_key=True)
@@ -27,7 +30,7 @@ class Parent(models.Model):
         ordering = ['parent_id']
 
     def __str__(self):
-        return self.parent_id+"-"+self.parent_name
+        return self.parent_id + "-" + self.parent_name
 
 
 class Provider(models.Model):
@@ -78,6 +81,9 @@ class Engagement(models.Model):
     def getParentName(self):
         return self.parent.parent_name
 
+    def getTCBudget(self):
+        return str(self.time_code.time_code_hours)
+
 
 class Assignments(models.Model):
     assignment_id = models.AutoField(primary_key=True, blank=False, null=False)
@@ -86,3 +92,62 @@ class Assignments(models.Model):
 
     def __str__(self):
         return self.engagement.srg_id
+
+    def getScope(self):
+        return self.engagement.time_code
+
+    def getProvider(self):
+        return self.engagement.provider
+
+    def getFYE(self):
+        return self.engagement.fye
+
+
+class Time(models.Model):
+    timesheet_id = models.AutoField(primary_key=True)
+    # expense_id = models.ForeignKey(TblExpense, on_delete=models.CASCADE, null=True, blank=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    engagement = models.ForeignKey(Engagement, db_column='srg_id', on_delete=models.CASCADE)
+    date = models.DateField(default=date.today())
+    # provider_id = models.ForeignKey(TblProvider, on_delete=models.CASCADE)
+    # time_code = models.ForeignKey(TblTimeCode, on_delete=models.CASCADE)
+    hours = models.DecimalField(max_digits=4, decimal_places=2)
+    # type_id = models.ForeignKey(TblTypes, on_delete=models.CASCADE)
+    # fye = models.DateField(null=True, blank=True)
+    note = models.TextField(max_length=500, null=True, blank=True)
+
+    def __str__(self):
+        return self.engagement
+
+    def getUsername(self):
+        return self.employee.user
+
+    def getProvider(self):
+        return self.engagement.provider
+
+    def getScope(self):
+        return self.engagement.time_code
+
+
+class Todolist(models.Model):
+    todolist_id = models.AutoField(primary_key=True)
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    engagement = models.ForeignKey(Engagement, db_column='srg_id', on_delete=models.CASCADE)
+    todo_date = models.DateField(default=date.today())
+    anticipated_hours = models.DecimalField(max_digits=4, decimal_places=2)
+    note = models.TextField(max_length=250, null=True, blank=True)
+
+    def __str__(self):
+        return self.engagement
+
+    def getUsername(self):
+        return self.employee.user
+
+    def getProvider(self):
+        return self.engagement.provider
+
+    def getScope(self):
+        return self.engagement.time_code
+
+    def getFYE(self):
+        return self.engagement.fye

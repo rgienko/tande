@@ -40,3 +40,10 @@ class EngagementAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Engagement, EngagementAdmin)
+
+
+class TimeAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'engagement', 'date', 'hours', 'note')
+
+
+admin.site.register(Time, TimeAdmin)

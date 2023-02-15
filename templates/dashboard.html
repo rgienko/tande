@@ -1,0 +1,150 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="row d-flex justify-content-between">
+        <div class="col-6 d-flex align-items-center justify-content-start">
+            {% if user.is_staff %}
+                <span class="srg-header fs-3">{{ user.first_name }}'s Admin Dashboard</span>
+            {% else %}
+                <span class="srg-header fs-3">{{ user.first_name }}'s Dashboard</span>
+            {% endif %}
+        </div>
+        <div class="col-6 d-flex align-items-center justify-content-end">
+            <a href="{% url 'create-engagement' %}" class="srg-link ">
+                <i class="fs-5 bi bi-plus-square"></i>
+                <span class="ms-2 fs-5"> New Engagement</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-4 col-md-12 col-sm-4 overflow-auto" id="list-tab" role="tablist">
+            <span class="srg-header fs-3">My Engagements</span>
+            <table class="table">
+                {% for engagement in all_engagements %}
+                    <tr>
+                        <td>
+                            <a class="srg-link" role="tab" id="list-{{ engagement.srg_id }}-list"
+                                                    data-bs-toggle="list"
+                                                    aria-controls="{{ engagement.srg_id }}"
+                                                    href="#list-{{ forloop.counter }}">
+                                {{ engagement.srg_id }}
+                                </a><br>
+                            {{ engagement.provider }}<br>
+                            {{ engagement.time_code }}<br>
+                            FYE: {{ engagement.fye|date:'m/d/Y' }}
+
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </table>
+        </div>
+        <div class="col-lg-8 col-md-12 col-sm-8 border-start">
+            <span class="srg-header fs-3">Engagement Details</span>
+
+            <div class="tab-content" id="nav-tabContent">
+                {% for engagement in all_engagements %}
+                    <div class="tab-pane {% if forloop.counter == 1 %}active{% else %}{% endif %}" id="list-{{ forloop.counter }}" role="tabpanel" aria-labelledby="list-{{ engagement.srg_id }}-list">
+                        <div class="card border shadow-sm p-2 srg-bg-secondary rounded">
+                            <div class="row">
+                                <div class="col-xxl-2 col-xl-3 col-lg-3 col-md-3 fw-bolder">
+                                    Engagement ID:<br>
+                                    Provider:<br>
+                                    Parent:<br>
+                                    Scope:<br>
+                                    Fiscal Year:<br>
+                                    Hours Budget:<br>
+                                    Hours Recorded:<br>
+                                </div>
+                                <div class="col-xxl-10 col-xl-9 col-lg-9 col-md-9">
+                                    {{ engagement.srg_id}}<br>
+                                    {{ engagement.provider }}<br>
+                                    {{ engagement.parent }}<br>
+                                    {{ engagement.time_code }}<br>
+                                    {{ engagement.fye|date:'m/d/Y' }}<br>
+                                    {{ engagement.getTCBudget }}<br>
+                                    {{ engagement.engagement_hours.project_hours }}<br>
+                                </div>
+                            </div>
+
+                            <div class="my-3">
+                                <a type="button" class="text-decoration-none open-modal-button srg-btn-primary"
+                               id="modal-{{ engagement.srg_id }}-modal"
+                               data-bs-toggle="modal"
+                               data-bs-target="#modal-{{ forloop.counter }}"
+                               data-id="{{ engagement.srg_id }}"
+                               href="#modal-{{ forloop.counter }}-modal"
+                               aria-controls="{{ engagement.srg_id }}">
+                                    <i class="bi bi-clock"></i> Record Time
+                                </a>
+                                <a href="#" type="button" class="text-decoration-none srg-success-button mx-3">
+                                    <i class="bi bi-currency-dollar"></i> Record Expense
+                                </a>
+                                <a href="{% url 'add-assignments' engagement.engagement_id %}" type="button" class="text-decoration-none srg-btn-primary me-3">
+                                    <i class="bi bi-currency-dollar"></i> Assign
+                                </a>
+                                <a href="#" type="button" class="text-decoration-none srg-link">
+                                    <i class="bi bi-check-circle"></i> Complete Project
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="shadow-sm mb-5 rounded mt-2 border">
+                            <span class="srg-header fs-3 ps-1">Engagement Hours</span>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Employee</th>
+                                        <th scope="col">Hours</th>
+                                        <th scope="col">Rate</th>
+                                    </tr>
+                                </thead>
+                                {% for entry in engagement.engagement_time_sheet_entries %}
+                                    <tr>
+                                        <td>{{ entry.employee__user__username }}</td>
+                                        <td>{{ entry.engagement_emp_hours }}</td>
+                                        <td>{{ entry.employee__rate }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% for engagement in all_engagements %}
+            <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="modal-{{ engagement.srg_id }}-modal" aria-hidden="true">
+                    <div class="modal-dialog" id="modal">
+                        <div class="modal-content">
+                            <div class="modal-header srg-bg-primary text-light">
+                                Record Hours
+                            </div>
+                            <div class="modal-body">
+                                ID: <span id="object-id-{{ forloop.counter }}">{{ engagement.srg_id}}</span>
+
+                                <form class="" method="POST">
+                                    {% csrf_token %}
+                                        <label for="my-input-{{ forloop.counter }}">Engagement:</label><br>
+                                        <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.srg_id }}"/><br>
+                                    {% for field in add_time_form %}
+                                        <div class="fieldWrapper mb-3">
+                                            {{ field.label_tag }} <br>{{ field }}
+                                            {% if field.help_text %}
+                                            <p class="help">{{ field.help_text|safe }}</p>
+                                            {% endif %}
+                                        </div>
+
+                                    {% endfor %}
+                                    <button class="srg-btn-primary my-2">Add Hours</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        {% endfor %}
+    </div>
+
+
+{% endblock %}

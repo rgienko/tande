@@ -21,7 +21,10 @@ from app import views
 urlpatterns = [
     path("login/", views.login, name='login'),
     path("register/", views.register, name='register'),
-    path("dashboard/", views.dashboard, name='dashboard'),
+    path("dashboard/", views.Dashboard.as_view(), name='dashboard'),
+    path("timesheet/", views.Timesheet.as_view(), name='timesheet'),
+    path("timesheet/edit/<pk>/", views.editTimesheet, name='edit-timesheet'),
+    path("todolist/", views.TodolistView.as_view(), name='todolist'),
     path("create-engagement/", views.createEngagement, name='create-engagement'),
     path("add-assignments/<pk>/", views.createAssignments, name='add-assignments'),
     path("dashboard/engagements/", views.engagementDashboard, name='dashboard-engagements'),

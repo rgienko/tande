@@ -15,20 +15,14 @@
 <body>
 
     <div class="container-fluid">
-        <div class="row flex-nowrap">
-            <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 srg-bg-primary" style="border-bottom-right-radius: 24px; border-top-right-radius: 24px">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
-                    <a href="#" class="d-flex align-items-center pb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-                        <span class="fs-5 d-none d-sm-inline">
-                                <img src="{% static 'img/starLogo.png' %}" alt="Logo" width="42" height="48">TandE
-
-                        </span>
-                    </a>
-                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start text-light link-light" id="menu">
+        <div class="row flex-md-nowrap">
+            <div class="col-auto px-0 srg-bg-primary" style="border-bottom-right-radius: 24px; border-top-right-radius: 24px">
+                <div class="d-flex flex-column align-items-center align-items-md-start px-3 pt-2 text-white min-vh-100">
+                    <ul class="nav nav-pills flex-column mb-md-auto mb-0 align-items-center align-items-md-start text-light link-light" id="menu">
 
                         <li>
                             <a href="{% url 'dashboard' %}" class="nav-link px-0 align-middle link-light">
-                                <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 fs-5 d-none d-sm-inline">Dashboard</span>
+                                <i class="fs-4 bi-speedometer2"></i> <span class="ms-1 fs-5 d-none d-md-inline">Dashboard</span>
                             </a>
                             <!--
                             <ul class="collapse show nav flex-column ms-1" id="submenu1" data-bs-parent="#menu">
@@ -42,26 +36,26 @@
                             -->
                         </li>
                         <li>
-                            <a href="#" class="nav-link px-0 align-middle link-light">
-                                <i class="fs-4 bi bi-clock"></i> <span class="ms-1 fs-5 d-none d-sm-inline">Timesheet</span></a>
+                            <a href="{% url 'timesheet' %}" class="nav-link px-0 align-middle link-light">
+                                <i class="fs-4 bi bi-clock"></i> <span class="ms-1 fs-5 d-none d-md-inline">Timesheet</span></a>
                         </li>
 
                         <li>
-                            <a href="" class="nav-link px-0 align-middle link-light">
-                                <i class="fs-4 bi bi-check2-circle"></i> <span class="ms-1 fs-5 d-none d-sm-inline">To-Do List</span> </a>
+                            <a href="{% url 'todolist' %}" class="nav-link px-0 align-middle link-light">
+                                <i class="fs-4 bi bi-check2-circle"></i> <span class="ms-1 fs-5 d-none d-md-inline">To-Do List</span> </a>
                         </li>
                         <li>
                             <a href="" class="nav-link px-0 align-middle link-light">
-                                <i class="fs-4 bi bi-currency-dollar"></i> <span class="ms-1 fs-5 d-none d-sm-inline">Expenses</span> </a>
+                                <i class="fs-4 bi bi-currency-dollar"></i> <span class="ms-1 fs-5 d-none d-md-inline">Expenses</span> </a>
                         </li>
                         <li>
                             <a href="#" class="nav-link px-0 align-middle link-light">
-                                <i class="fs-5 bi bi-amd"></i> <span class="ms-2 fs-5 d-none d-sm-inline"> Admin</span>
+                                <i class="fs-5 bi bi-amd"></i> <span class="ms-2 fs-5 d-none d-md-inline"> Admin</span>
                             </a>
                         </li>
                         <li>
                             <a href="{% url 'dashboard-engagements' %}" class="nav-link px-0 align-middle link-light">
-                                <i class="fs-5 bi bi-view-list"></i> <span class="ms-2 fs-5 d-none d-sm-inline">Engagements</span>
+                                <i class="fs-5 bi bi-view-list"></i> <span class="ms-2 fs-5 d-none d-md-inline">Engagements</span>
                             </a>
                         </li>
 
@@ -70,8 +64,8 @@
                     <hr>
                     <div class="dropdown pb-4">
                         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="https://github.com/mdo.png" alt="hugenerd" width="30" height="30" class="rounded-circle">
-                            <span class="d-none d-sm-inline mx-1">loser</span>
+                            <i class="bi bi-person-circle fs-4"></i>
+                            <span class="d-none d-md-inline mx-1">{{ user.first_name }}</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
                             <li><a class="dropdown-item" href="#">New project...</a></li>
@@ -106,8 +100,5 @@
            })
         </script>
     </div>
-</body>
-</html>
-
 </body>
 </html>

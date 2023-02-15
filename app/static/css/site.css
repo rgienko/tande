@@ -56,6 +56,10 @@
     text-decoration: none;
 }
 
+.srg-link-secondary {
+    color: #ffc107
+}
+
 .srg-btn-primary:hover {
     border: 1px solid #02308C;
     background: white;
