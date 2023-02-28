@@ -7,6 +7,14 @@
     background: #02308C
 }
 
+.srg-bg-success {
+    background: #004000
+}
+
+.srg-bg-danger {
+    background: #8B0000;
+}
+
 .srg-header-secondary {
     color: #d9d9d9
 }
@@ -123,4 +131,15 @@
     border-radius: 50px;
     padding:8px 32px;
     color: white;
+}
+
+
+.search-box {
+    border: 1px solid #02308C;
+    border-radius: 5px;
+    height: 40px;
+    width: 100%;
+    max-width:360px;
+    padding: 2px 2px 2px 8px;
+    outline: 0;
 }

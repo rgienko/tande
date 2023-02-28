@@ -3,7 +3,7 @@
 {% block content %}
     <div class="row d-flex justify-content-between">
         <div class="col-6 d-flex align-items-center justify-content-start">
-            <span class="srg-header fs-3">Dashboard - Engagements</span>
+            <span class="srg-header fs-2">Engagement Dashboard</span>
         </div>
         <div class="col-6 d-flex align-items-center justify-content-end">
             <a href="{% url 'create-engagement' %}" class="srg-link ">
@@ -13,27 +13,103 @@
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-lg-4 col-md-4 overflow-auto">
-            <span class="srg-header fs-3">Current Engagements</span>
-            <table class="table">
+     <div class="row mt-4">
+        <div class="col-4">
+            <span class="srg-header fs-3">All Engagements</span>
+            <table class="table table-borderless">
                 {% for engagement in all_engagements %}
                     <tr>
-                        <td>
-                            {{ engagement.srg_id }}<br>
-                            {{ engagement.provider }}<br>
-                            {{ engagement.parent }}<br>
-                            {{ engagement.time_code }}<br>
-                            FYE: {{ engagement.fye|date:'m/d/Y' }}
+                        <td class="">
+                            <div class="card">
+                                <div class="card-body p-2">
+                                    {{ engagement.srg_id }}<br>
+                                    {{ engagement.provider }}<br>
+                                    {{ engagement.time_code }}<br>
+                                    FYE: {{ engagement.fye|date:'m/d/Y' }}
 
+                                </div>
+
+                                <div class="card-footer srg-bg-primary py-2 border-0 text-center">
+                                    <a  class="link-light text-decoration-none open-modal-button"
+                                        id="modal-{{ engagement.engagement }}-modal"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modal-{{ forloop.counter }}"
+                                        data-id="{{ engagement.engagement }}"
+                                        href="#modal-{{ forloop.counter }}-modal"
+                                        aria-controls="{{ engagement.engagement }}">
+
+                                    </a>
+                                </div>
+                            </div>
                         </td>
                     </tr>
 
                 {% endfor %}
             </table>
         </div>
-        <div class="col-8 border-start">
-            <span class="srg-header fs-3"> Engagement Details</span>
+        <div class="col-4 border-start border-end">
+            <span class="srg-header fs-3">Assigned Engagements</span>
+            <table class="table table-borderless">
+                {% for engagement in assigned_engagements %}
+                    <tr>
+                        <td class="">
+                            <div class="card">
+                                <div class="card-body p-2">
+
+                                    {{ engagement.engagement_id__srg_id }}<br>
+                                    {{ engagement.engagement_id__provider_id }}-{{ engagement.engagement_id__provider_id__provider_name }}<br>
+                                    {{ engagement.engagement_id__time_code }}-{{ engagement.engagement_id__time_code__time_code_desc }}<br>
+                                    FYE: {{ engagement.engagement_id__fye|date:'m/d/Y' }}
+
+                                </div>
+
+                                <div class="srg-bg-success card-footer py-2 border-0 text-center">
+                                    <a class="text-decoration-none open-modal-button link-light"
+                                        id="modal-{{ engagement.engagement }}-modal"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modal-{{ forloop.counter }}"
+                                        data-id="{{ engagement.engagement }}"
+                                        href="#modal-{{ forloop.counter }}-modal"
+                                        aria-controls="{{ engagement.engagement }}">
+
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </table>
+        </div>
+        <div class="col-4">
+            <span class="srg-header fs-3">Un-Assigned Engagements</span>
+            <table class="table table-borderless">
+                {% for engagement in unassigned_engagements %}
+                    <tr>
+                        <td class="">
+                            <div class="card">
+                                <div class="card-body p-2">
+                                    {{ engagement.srg_id }}<br>
+                                    {{ engagement.provider }}<br>
+                                    {{ engagement.time_code }}<br>
+                                    FYE: {{ engagement.fye|date:'m/d/Y' }}
+
+                                </div>
+
+                                <div class="card-footer srg-bg-danger py-2 border-0 text-center">
+                                    <a href="{% url 'add-assignments' engagement.engagement_id %}"
+                                       class="link-light text-decoration-none open-modal-button">
+
+                                        Assign Staff
+
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+
+                {% endfor %}
+            </table>
         </div>
     </div>
 

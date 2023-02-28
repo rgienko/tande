@@ -3,7 +3,6 @@ from django import forms
 from .models import *
 from .widget import *
 from django.utils.translation import gettext_lazy as _
-from bootstrap_datepicker_plus.widgets import DateTimePickerInput
 
 
 class EngagementForm(forms.ModelForm):
@@ -78,4 +77,18 @@ class TodoForm(forms.ModelForm):
         widgets = {
             'note': forms.Textarea(attrs={'rows': 5, 'cols': 40}),
             'start_date': DatePickerInput()
+        }
+
+
+class ExpenseForm(forms.ModelForm):
+
+    class Meta:
+        model = Expense
+
+        fields = ['expense_category', 'expense_amount']
+
+        labels = {
+            'engagement': _('Engagement'),
+            'expense_category': _('Category'),
+            'expense_amount': _('Amount')
         }
