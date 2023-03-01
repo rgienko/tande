@@ -55,6 +55,7 @@
                 {% endfor %}
             </table>
         </div>
+
         <div class="col-lg-8 col-md-12 col-sm-8 border-start">
             <span class="srg-header fs-3">Engagement Details</span>
 
@@ -84,33 +85,55 @@
                             </div>
 
                             <div class="my-3">
-                                <a type="button" class="text-decoration-none open-modal-button srg-btn-primary"
-                               id="modal-{{ engagement.srg_id }}-modal"
-                               data-bs-toggle="modal"
-                               data-bs-target="#modal-{{ forloop.counter }}"
-                               data-id="{{ engagement.srg_id }}"
-                               href="#modal-{{ forloop.counter }}-modal"
-                               aria-controls="{{ engagement.srg_id }}">
-                                    <i class="bi bi-clock"></i> Record Time
-                                    </a>
-                                    <a href="#" type="button" class="text-decoration-none srg-success-button mx-3"
-                                       id="expense-modal-{{ engagement.srg_id }}-modal"
-                                       data-bs-toggle="modal"
-                                       data-bs-target="#expense-modal-{{ forloop.counter }}"
-                                       data-id="{{ engagement.srg_id }}"
-                                       href="#expense-modal-{{ forloop.counter }}-modal"
-                                       aria-controls="{{ engagement.srg_id }}">
-                                        <i class="bi bi-currency-dollar"></i> Record Expense
-                                    </a>
+                                {% if engagement.is_complete is True %}
                                     {% if user.is_staff %}
+                                        <a type="button" class="text-decoration-none srg-link"
+                                        id="expense-modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
+                                        data-bs-target="#complete-modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
+                                        href="#complete-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                        <i class="bi bi-check-circle"></i> Open Project
+                                    </a>
+                                    {% else %}
+                                        This is engagement is closed, please contact leadership to reopen the engagement.
+                                    {% endif %}
+                                {% else %}
+                                    {% if user.is_staff %}
+                                        <a type="button" class="text-decoration-none open-modal-button srg-btn-primary"
+                                           id="modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
+                                           href="#modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                                <i class="bi bi-clock"></i> Record Time
+                                        </a>
+                                        <a type="button" class="text-decoration-none srg-success-button mx-3"
+                                           id="expense-modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#expense-modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
+                                           href="#expense-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                                <i class="bi bi-currency-dollar"></i> Record Expense
+                                        </a>
                                         <a href="{% url 'add-assignments' engagement.engagement_id %}" type="button" class="text-decoration-none srg-btn-primary me-3">
                                             <i class="bi bi-person-add"></i> Assign
                                         </a>
-                                        <a href="#" type="button" class="text-decoration-none srg-link">
-                                            <i class="bi bi-check-circle"></i> Complete Project
+                                        <a type="button" class="text-decoration-none srg-link"
+                                            id="expense-modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
+                                            data-bs-target="#complete-modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
+                                            href="#complete-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                            <i class="bi bi-check-circle"></i> {% if engagement.is_complete is True %}Open Project{% else %}Close Project{% endif %}
                                         </a>
                                     {% else %}
+                                        <a type="button" class="text-decoration-none open-modal-button srg-btn-primary"
+                                           id="modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
+                                           href="#modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                                <i class="bi bi-clock"></i> Record Time
+                                        </a>
+                                        <a type="button" class="text-decoration-none srg-success-button mx-3"
+                                           id="expense-modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#expense-modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
+                                           href="#expense-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                                <i class="bi bi-currency-dollar"></i> Record Expense
+                                        </a>
                                     {% endif %}
+                                {% endif %}
                             </div>
                         </div>
 
@@ -191,6 +214,33 @@
 
                                 {% endfor %}
                                 <button class="srg-success-button my-2">Add Expense</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="complete-modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="complete-modal-{{ engagement.srg_id }}-modal" aria-hidden="true">
+                <div class="modal-dialog" id="modal">
+                    <div class="modal-content">
+                        <div class="modal-header srg-bg-primary text-light fs-5">
+                            Complete Project
+                        </div>
+                        <div class="modal-body">
+                            <form class="" method="POST">
+                                {% csrf_token %}
+                                    <label for="my-input-{{ forloop.counter }}">Engagement:</label><br>
+                                    <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.srg_id }}"/><br>
+                                {% for field in complete_engagement_form %}
+                                    <div class="fieldWrapper my-3">
+                                        {{ field.label_tag }} {{ field }}
+                                        {% if field.help_text %}
+                                        <p class="help">{{ field.help_text|safe }}</p>
+                                        {% endif %}
+                                    </div>
+
+                                {% endfor %}
+                                <button class="srg-btn-primary my-2">Complete</button>
                             </form>
                         </div>
                     </div>

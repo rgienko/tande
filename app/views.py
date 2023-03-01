@@ -1,6 +1,10 @@
 from datetime import timedelta
 
+import pandas
+from django_pandas.io import read_frame
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import auth, messages
 from django.urls import reverse_lazy
@@ -8,6 +12,7 @@ from django.views.generic import TemplateView
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from .filters import TimesheetFilter
 from .forms import *
 from .models import *
 
@@ -53,7 +58,7 @@ def register(request):
 
 
 class Dashboard(LoginRequiredMixin, TemplateView):
-    login_url = 'localhost:8000/login'
+    login_url = '/login'
     redirect_field_name = 'dashboard/'
     template_name = 'dashboard.html'
 
@@ -65,6 +70,7 @@ class Dashboard(LoginRequiredMixin, TemplateView):
     def get(self, *args, **kwargs):
         add_time_form = TimeForm(self.request.POST)
         add_expense_form = ExpenseForm(self.request.POST)
+        complete_engagement_form = CompleteEngagementForm(self.request.POST)
 
         if self.request.user.is_staff:
             all_engagements = Engagement.objects.all()
@@ -89,20 +95,23 @@ class Dashboard(LoginRequiredMixin, TemplateView):
 
             engagement.engagement_hours = engagement_total_hours
 
-        context = {'today': self.today, 'week_beg': self.week_beg, 'week_end': self.week_beg,
-                   'all_engagements': all_engagements, 'add_time_form': add_time_form, 'add_expense_form': add_expense_form}
+        context = {'today': self.today, 'week_beg': self.week_beg, 'week_end': self.week_end,
+                   'all_engagements': all_engagements, 'add_time_form': add_time_form,
+                   'add_expense_form': add_expense_form, 'complete_engagement_form': complete_engagement_form}
 
         return self.render_to_response(context)
 
     # noinspection DuplicatedCode
     def post(self, *args, **kwargs):
         # noinspection DuplicatedCode
-        add_time_form = TimeForm(self.request.POST)
-        add_expense_form = ExpenseForm(self.request.POST)
         engagement_id = self.request.POST.get('engagement-input')
-
         engagement_instance = get_object_or_404(Engagement, srg_id=engagement_id)
         employee_instance = get_object_or_404(Employee, user_id=self.request.user.id)
+
+        add_time_form = TimeForm(self.request.POST)
+        add_expense_form = ExpenseForm(self.request.POST)
+        complete_engagement_form = CompleteEngagementForm(self.request.POST, instance=engagement_instance)
+
         print(employee_instance)
 
         if add_time_form.is_valid():
@@ -120,12 +129,21 @@ class Dashboard(LoginRequiredMixin, TemplateView):
             new_expense.save()
             return redirect(reverse_lazy('dashboard'))
 
-        context = {'add_time_form': add_time_form, 'add_expense_form': add_expense_form}
+        elif complete_engagement_form.is_valid:
+            engagement_instance = complete_engagement_form.save(commit=False)
+            engagement_instance.save()
+
+            return redirect(reverse_lazy('dashboard'))
+
+        context = {'add_time_form': add_time_form, 'add_expense_form': add_expense_form,
+                   'complete_engagement_form': complete_engagement_form}
 
         return self.render_to_response(context)
 
 
-class Timesheet(TemplateView):
+class Timesheet(LoginRequiredMixin, TemplateView):
+    login_url = '/login'
+    redirect_field_name = 'timesheet/'
     template_name = 'timesheet.html'
 
     today = date.today()
@@ -154,7 +172,7 @@ class Timesheet(TemplateView):
         engagement_id = self.request.POST.get('engagement-input')
 
         engagement_instance = get_object_or_404(Engagement, srg_id=engagement_id)
-        employee_instance = get_object_or_404(Employee, pk=self.request.user.id)
+        employee_instance = get_object_or_404(Employee, user_id=self.request.user.id)
 
         if add_time_form.is_valid():
             new_entry = add_time_form.save(commit=False)
@@ -168,7 +186,9 @@ class Timesheet(TemplateView):
         return self.render_to_response(context)
 
 
-class TodolistView(TemplateView):
+class TodolistView(LoginRequiredMixin, TemplateView):
+    login_url = '/login'
+    # redirect_field_name = 'dashboard/'
     template_name = 'todolist.html'
 
     today = date.today()
@@ -189,7 +209,7 @@ class TodolistView(TemplateView):
     def post(self, *args, **kwargs):
         engagement_id = self.request.POST.get('engagement-input')
         engagement_instance = get_object_or_404(Engagement, srg_id=engagement_id)
-        employee_instance = get_object_or_404(Employee, pk=self.request.user.id)
+        employee_instance = get_object_or_404(Employee, user_id=self.request.user.id)
 
         add_todo_form = TodoForm(self.request.POST)
 
@@ -205,7 +225,9 @@ class TodolistView(TemplateView):
         return self.render_to_response(context)
 
 
-class TodolistViewAdmin(TemplateView):
+class TodolistViewAdmin(LoginRequiredMixin, TemplateView):
+    login_url = '/login'
+    # redirect_field_name = 'dashboard/'
     template_name = 'admin_todolist.html'
 
     today = date.today()
@@ -226,11 +248,16 @@ class TodolistViewAdmin(TemplateView):
         employees = Employee.objects.all().order_by('user_id')
 
         for emp in employees:
-            emp.emp_todo_list_day_one = current_todolist.filter(employee=emp.user_id).filter(todo_date=self.week_beg + timedelta(days=7))
-            emp.emp_todo_list_day_two = current_todolist.filter(employee=emp.user_id).filter(todo_date=self.week_beg + timedelta(days=8))
-            emp.emp_todo_list_day_three = current_todolist.filter(employee=emp.user_id).filter(todo_date=self.week_beg + timedelta(days=9))
-            emp.emp_todo_list_day_four = current_todolist.filter(employee=emp.user_id).filter(todo_date=self.week_beg + timedelta(days=10))
-            emp.emp_todo_list_day_five = current_todolist.filter(employee=emp.user_id).filter(todo_date=self.week_beg + timedelta(days=11))
+            emp.emp_todo_list_day_one = current_todolist.filter(employee=emp.user_id).filter(
+                todo_date=self.week_beg + timedelta(days=7))
+            emp.emp_todo_list_day_two = current_todolist.filter(employee=emp.user_id).filter(
+                todo_date=self.week_beg + timedelta(days=8))
+            emp.emp_todo_list_day_three = current_todolist.filter(employee=emp.user_id).filter(
+                todo_date=self.week_beg + timedelta(days=9))
+            emp.emp_todo_list_day_four = current_todolist.filter(employee=emp.user_id).filter(
+                todo_date=self.week_beg + timedelta(days=10))
+            emp.emp_todo_list_day_five = current_todolist.filter(employee=emp.user_id).filter(
+                todo_date=self.week_beg + timedelta(days=11))
 
         context = {'today': self.today, 'week_beg': self.week_beg, 'week_end': self.week_end,
                    'next_week_days': self.next_week_days, 'current_todo_list': current_todolist,
@@ -241,7 +268,7 @@ class TodolistViewAdmin(TemplateView):
     def post(self, *args, **kwargs):
         engagement_id = self.request.POST.get('engagement-input')
         engagement_instance = get_object_or_404(Engagement, srg_id=engagement_id)
-        employee_instance = get_object_or_404(Employee, pk=self.request.user.id)
+        employee_instance = get_object_or_404(Employee, user_id=self.request.user.id)
 
         add_todo_form = TodoForm(self.request.POST)
 
@@ -257,6 +284,7 @@ class TodolistViewAdmin(TemplateView):
         return self.render_to_response(context)
 
 
+@login_required(login_url='/login')
 def createEngagement(request):
     if request.method == 'POST':
 
@@ -285,6 +313,7 @@ def createEngagement(request):
     return render(request, 'create_engagement.html', context)
 
 
+@login_required(login_url='/login')
 def createAssignments(request, pk):
     engagement_instance = get_object_or_404(Engagement, pk=pk)
     srgid = engagement_instance.engagement_id
@@ -315,6 +344,7 @@ def createAssignments(request, pk):
     return render(request, 'create_assignments.html', context)
 
 
+@login_required(login_url='/login')
 def editTimesheet(request, pk):
     timesheet_instance = get_object_or_404(Time, pk=pk)
 
@@ -334,7 +364,9 @@ def editTimesheet(request, pk):
     return render(request, 'edit_timesheet.html', context)
 
 
-class EngagementDashboard(TemplateView):
+class EngagementDashboard(LoginRequiredMixin, TemplateView):
+    login_url = '/login'
+    # redirect_field_name = ''
     template_name = 'engagements.html'
 
     today = date.today()
@@ -343,12 +375,15 @@ class EngagementDashboard(TemplateView):
 
     def get(self, *args, **kwargs):
         all_engagements = Engagement.objects.all()
-        assigned_engagements = Assignments.objects.values('engagement_id', 'engagement_id__srg_id','engagement_id__time_code' ,
+        assigned_engagements = Assignments.objects.values('engagement_id', 'engagement_id__srg_id',
+                                                          'engagement_id__time_code',
                                                           'engagement_id__time_code__time_code_desc',
                                                           'engagement_id__provider_id', 'engagement_id__fye',
-                                                          'engagement_id__provider_id__provider_name').annotate(ecount=Count('engagement_id'))
+                                                          'engagement_id__provider_id__provider_name').annotate(
+            ecount=Count('engagement_id'))
 
-        unassigned_engagements = all_engagements.exclude(engagement_id__in=assigned_engagements.values_list('engagement_id', flat=True))
+        unassigned_engagements = all_engagements.exclude(
+            engagement_id__in=assigned_engagements.values_list('engagement_id', flat=True))
 
         current_todolist = Todolist.objects.all()
 
@@ -360,7 +395,9 @@ class EngagementDashboard(TemplateView):
         return self.render_to_response(context)
 
 
-class Expenses(TemplateView):
+class Expenses(LoginRequiredMixin, TemplateView):
+    login_url = '/login'
+    # redirect_field_name = ''
     template_name = 'expense.html'
 
     today = date.today()
@@ -369,7 +406,8 @@ class Expenses(TemplateView):
     thirty = date.today() - timedelta(days=30)
 
     def get(self, *args, **kwargs):
-        expense_entries = Expense.objects.filter(employee__user_id=self.request.user.id).filter(date__gte=self.week_beg).filter(
+        expense_entries = Expense.objects.filter(employee__user_id=self.request.user.id).filter(
+            date__gte=self.week_beg).filter(
             date__lte=self.week_end)
 
         weekly_total = expense_entries.values().aggregate(weekly_expense_total=Sum('expense_amount'))
@@ -383,7 +421,9 @@ class Expenses(TemplateView):
         return self.render_to_response(context)
 
 
-class TimesheetAdmin(TemplateView):
+class TimesheetAdmin(LoginRequiredMixin, TemplateView):
+    login_url = '/login'
+    # redirect_field_name = ''
     template_name = 'admin_timesheet.html'
 
     today = date.today()
@@ -405,3 +445,29 @@ class TimesheetAdmin(TemplateView):
                    'add_time_form': add_time_form, 'weekly_total': weekly_total}
 
         return self.render_to_response(context)
+
+
+@login_required(login_url='/login')
+def adminTS(request):
+    today = date.today()
+    week_beg = today - timedelta(days=today.weekday())
+    week_end = week_beg + timedelta(days=5)
+    thirty = date.today() - timedelta(days=30)
+
+    f = TimesheetFilter(request.GET, queryset=Time.objects.all())
+
+    if request.method == 'GET' and 'extract_button' in request.GET:
+        ts_data = read_frame(f.qs)
+
+        fname = 'EmployeeTimesheetCompilation'
+
+        response = HttpResponse(content_type='application/vns.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename=' + fname + '.xlsx'
+        with pandas.ExcelWriter(response, engine='xlsxwriter') as writer:
+            ts_data.to_excel(writer, sheet_name=('SRG Timesheet'), index=False, header=True)
+            # df_hfy.to_excel(writer, sheet_name=('PFY ' + fye), index=False, header=True)
+
+            return response
+
+    context = {'filter': f, 'today': today, 'week_beg': week_beg, 'week_end': week_end}
+    return render(request, 'admin_timesheet.html', context)

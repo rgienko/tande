@@ -18,6 +18,16 @@ class EngagementForm(forms.ModelForm):
         }
 
 
+class CompleteEngagementForm(forms.ModelForm):
+    class Meta:
+        model = Engagement
+
+        fields = ['is_complete']
+
+        labels = {
+            'is_complete': _('Is Complete')
+        }
+
 class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignments

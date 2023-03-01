@@ -15,11 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.contrib.auth import views as auth_views
 
 from app import views
 
 urlpatterns = [
     path("login/", views.login, name='login'),
+    path("logout/", auth_views.LogoutView.as_view(template_name='login.html'), name='logout'),
     path("register/", views.register, name='register'),
     path("dashboard/", views.Dashboard.as_view(), name='dashboard'),
     path("timesheet/", views.Timesheet.as_view(), name='timesheet'),
@@ -27,7 +29,7 @@ urlpatterns = [
     path("timesheet/edit/<pk>/", views.editTimesheet, name='edit-timesheet'),
     path("todolist/", views.TodolistView.as_view(), name='todolist'),
     path("todolist_admin/", views.TodolistViewAdmin.as_view(), name='admin-todolist'),
-    path("timesheet_admin/", views.TimesheetAdmin.as_view(), name='admin-timesheet'),
+    path("timesheet_admin/", views.adminTS, name='admin-timesheet'),
     path("create-engagement/", views.createEngagement, name='create-engagement'),
     path("add-assignments/<pk>/", views.createAssignments, name='add-assignments'),
     path("dashboard/engagements/", views.EngagementDashboard.as_view(), name='dashboard-engagements'),

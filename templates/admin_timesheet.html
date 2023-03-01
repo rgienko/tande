@@ -9,6 +9,29 @@
         </div>
     </div>
 
+
+    <div class="row p-3 mt-2">
+        <div class="card py-2">
+            <h4 class="fw-normal srg-header">Search Form</h4>
+            <form method="get">
+                {% for field in filter.form %}
+                    <div class="fieldWrapper mb-3">
+                        {{ field.label_tag }} <br> {{ field }}
+                        {% if field.help_text %}
+                        <p class="help">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="d-flex justify-content-start align-items-center gap-3 mt-1">
+                    <input class="srg-btn-primary" type="submit" value="Search Timesheet">
+                    <input class="srg-btn-secondary" name='extract_button' type="submit" value="Extract Timesheet">
+                    <a class="srg-link" href="{% url 'admin-timesheet' %}">Clear Form</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
     <div class="row mt-4">
         <div class="col-12 overflow-auto">
             <table class="table table-bordered">
@@ -22,11 +45,10 @@
                         <th>Scope</th>
                         <th>Hours</th>
                         <th>Note</th>
-                        <th>Actions</th>
 
                     </tr>
                 </thead>
-                {% for entry in timesheet_entries %}
+                {% for entry in filter.qs %}
                     <tr class="text-center align-middle">
                         <td class="">{{ entry.date|date:'m/d/Y' }}</td>
                         <td class="">{{ entry.employee }}</td>
@@ -35,32 +57,8 @@
                         <td class="">{{ entry.getScope }}</td>
                         <td>{{ entry.hours }}</td>
                         <td>{{ entry.note }}</td>
-                        <td class="text-center">
-                            <a class="open-modal-button text-decoration-none srg-link"
-                                id="modal-{{ entry.srg_id }}-modal"
-                                data-bs-toggle="modal"
-                                data-bs-target="#modal-{{ forloop.counter }}"
-                                data-id="{{ entry.srg_id }}"
-                                href="#modal-{{ forloop.counter }}-modal"
-                                aria-controls="{{ entry.srg_id }}">
-                                <i class="fs-5 bi bi-clock"></i>
-                            </a>
-                            <a class="text-decoration-none srg-link-secondary" href="{% url 'edit-timesheet' entry.timesheet_id %}">
-                                <i class="fs-5 bi bi-pencil-square "></i>
-                            </a>
-
-                        </td>
                     </tr>
                 {% endfor %}
-                <tfoot>
-                    <tr class="text-center border-0">
-                        <td class="border-0"></td>
-                        <td class="border-0"></td>
-                        <td class="border-0"></td>
-                        <td class="border-0 fw-bolder text-end">Weekly Total:</td>
-                        <td class="border-0 fw-bolder">{{ weekly_total.weekly_hours_total }}</td>
-                    </tr>
-                </tfoot>
             </table>
         </div>
 
