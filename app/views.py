@@ -1,16 +1,23 @@
+import os
 from datetime import timedelta
 
 import pandas
+from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from django_pandas.io import read_frame
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import auth, messages
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
+from django.core.mail import EmailMessage
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from sendgrid import SendGridAPIClient
 
 from .filters import TimesheetFilter
 from .forms import *
@@ -55,6 +62,46 @@ def register(request):
         pass
 
     return render(request, 'register.html')
+
+
+def resetPassword(request):
+    SENDGRID_API_KEY = os.environ["SENDGRID_KEY"]
+    if request.method == 'POST':
+        password_reset_form = PasswordResetForm(request.POST)
+        if password_reset_form.is_valid():
+            data = password_reset_form.cleaned_data['email']
+            associated_user = User.objects.filter(Q(email=data))
+            if associated_user.exists():
+                for user in associated_user:
+                    msg = EmailMessage(
+                        from_email='Randall.Gienko@srgroupllc.com',
+                        to=[user.email,]
+                    )
+
+                    protocol = 'http://'
+                    domain = '127.0.0.1:8000/accounts/reset/'
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    user = user
+                    token = default_token_generator.make_token(user)
+
+                    msg.template_id = "d-31d5b59a90454aaa8cd685b7011ce213"
+                    msg.dynamic_template_data = {
+                        "title": 'Password Reset',
+                        "protocol": protocol,
+                        "domain": domain,
+                        "uid": uid,
+                        "token": token,
+                        "reset_url": protocol + domain + uid + "/" + token
+                    }
+                    msg.send(fail_silently=False)
+
+                    return redirect("/accounts/password_reset/done")
+                    # sg = SendGridAPIClient(SENDGRID_API_KEY)
+                    # sg.send(msg)
+
+    password_reset_form = PasswordResetForm()
+    context = {'password_reset_form': password_reset_form}
+    return render(request, 'password_reset.html', context)
 
 
 class Dashboard(LoginRequiredMixin, TemplateView):
@@ -476,3 +523,5 @@ def adminTS(request):
 
     context = {'filter': f, 'today': today, 'week_beg': week_beg, 'week_end': week_end}
     return render(request, 'admin_timesheet.html', context)
+
+
