@@ -28,6 +28,7 @@ class CompleteEngagementForm(forms.ModelForm):
             'is_complete': _('Is Complete')
         }
 
+
 class AssignmentForm(forms.ModelForm):
     class Meta:
         model = Assignments
@@ -57,7 +58,7 @@ class EditTimeForm(forms.ModelForm):
     class Meta:
         model = Time
 
-        fields = ['engagement','date', 'hours', 'note']
+        fields = ['engagement', 'date', 'hours', 'note']
 
         labels = {
             'engagement': _('Engagement'),
@@ -91,7 +92,6 @@ class TodoForm(forms.ModelForm):
 
 
 class ExpenseForm(forms.ModelForm):
-
     class Meta:
         model = Expense
 

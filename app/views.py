@@ -152,7 +152,7 @@ class Timesheet(LoginRequiredMixin, TemplateView):
     thirty = date.today() - timedelta(days=30)
 
     def get(self, *args, **kwargs):
-        timesheet_entries = Time.objects.filter(employee=self.request.user.id).filter(date__gte=self.week_beg).filter(
+        timesheet_entries = Time.objects.filter(employee__user_id=self.request.user.id).filter(date__gte=self.week_beg).filter(
             date__lte=self.week_end)
 
         weekly_total = timesheet_entries.values().aggregate(weekly_hours_total=Sum('hours'))
@@ -197,7 +197,7 @@ class TodolistView(LoginRequiredMixin, TemplateView):
 
     def get(self, *args, **kwargs):
         assigned_engagements = Assignments.objects.select_related('engagement').filter(assignee=self.request.user.id)
-        current_todolist = Todolist.objects.filter(employee=self.request.user.id)
+        current_todolist = Todolist.objects.filter(employee__user_id=self.request.user.id)
         add_todo_form = TodoForm(self.request.POST)
 
         context = {'today': self.today, 'week_beg': self.week_beg, 'week_end': self.week_end,
@@ -245,18 +245,18 @@ class TodolistViewAdmin(LoginRequiredMixin, TemplateView):
 
     def get(self, *args, **kwargs):
         current_todolist = Todolist.objects.all()
-        employees = Employee.objects.all().order_by('user_id')
+        employees = Employee.objects.all().order_by('user__first_name')
 
         for emp in employees:
-            emp.emp_todo_list_day_one = current_todolist.filter(employee=emp.user_id).filter(
+            emp.emp_todo_list_day_one = current_todolist.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=7))
-            emp.emp_todo_list_day_two = current_todolist.filter(employee=emp.user_id).filter(
+            emp.emp_todo_list_day_two = current_todolist.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=8))
-            emp.emp_todo_list_day_three = current_todolist.filter(employee=emp.user_id).filter(
+            emp.emp_todo_list_day_three = current_todolist.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=9))
-            emp.emp_todo_list_day_four = current_todolist.filter(employee=emp.user_id).filter(
+            emp.emp_todo_list_day_four = current_todolist.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=10))
-            emp.emp_todo_list_day_five = current_todolist.filter(employee=emp.user_id).filter(
+            emp.emp_todo_list_day_five = current_todolist.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=11))
 
         context = {'today': self.today, 'week_beg': self.week_beg, 'week_end': self.week_end,
@@ -293,14 +293,19 @@ def createEngagement(request):
         who = request.POST.get('provider')
         what = request.POST.get('time_code')
         when = request.POST.get('fye')
-        when = when[:4]
         how = request.POST.get('type')
-        srgid = who + "." + str(what) + "." + str(
-            when) + "." + how
+        print(when)
+
+        if when == '':
+            srg_id = who + "." + str(what) + "." + how
+        else:
+            when = when[:4]
+            srg_id = who + "." + str(what) + "." + str(
+                when) + "." + how
 
         if form.is_valid():
             new_engagement = form.save(commit=False)
-            new_engagement.srg_id = srgid
+            new_engagement.srg_id = srg_id
             new_engagement.save()
 
             return redirect('add-assignments', new_engagement.engagement_id)
