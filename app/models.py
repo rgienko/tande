@@ -163,6 +163,10 @@ class Todolist(models.Model):
     def getFYE(self):
         return self.engagement.fye
 
+    def getEmployeeInitials(self):
+        return self.employee.user.first_name[:1] + self.employee.user.last_name[:1]
+
+
 
 class ExpenseCategory(models.Model):
     expense_category_id = models.AutoField(primary_key=True)
