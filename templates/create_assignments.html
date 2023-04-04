@@ -3,28 +3,48 @@
 {% block content %}
 
     <div class="container-fluid">
-        <div class="d-flex justify-content-evenly flex-row flex-xl-nowrap flex-lg-wrap flex-md-wrap flex-sm-wrap srg-bg-secondary rounded-4 p-2 table-responsive-md">
-            <div class="rounded-2 srg-border px-2 col-4">
-                <h4 class="text-start fs-2 py-2 fw-normal srg-header" style="border-bottom: 1px solid #a9a9a9">Add Assignments</h4>
-                <form class="" method="POST">
-                    {% csrf_token %}
-                    {% for field in form %}
-                        <div class="fieldWrapper mb-3">
-                            {{ field.label_tag }} <br>{{ field }}
-                            {% if field.help_text %}
-                            <p class="help">{{ field.help_text|safe }}</p>
-                            {% endif %}
-                        </div>
-                    {% endfor %}
-                    <button class="srg-btn-primary my-2" name="assign_continue_button">Assign & Continue</button>
-                    <button class="srg-btn-primary my-2" name="assign_another_button">Assign Another</button>
-                </form>
+        <div class="d-flex justify-content-evenly flex-row flex-xxl-wrap flex-xl-wrap flex-lg-wrap flex-md-wrap flex-sm-wrap p-2 table-responsive-md">
+            <div class="rounded-2 srg-border col-xxl-6 col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12 row">
+            <h4 class="text-start fs-2 py-2 fw-normal srg-header" style="border-bottom: 1px solid #a9a9a9">Add Assignments</h4>
+                <div class="col-auto">
+                    <form class="" method="POST">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="fieldWrapper mb-3">
+                                {{ field.label_tag }} <br>{{ field }}
+                                {% if field.help_text %}
+                                <p class="help">{{ field.help_text|safe }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <button class="srg-btn-primary my-2" name="assign_continue_button">Assign & Continue</button>
+                        <button class="srg-btn-primary my-2" name="assign_another_button">Assign Another</button>
+                    </form>
+                </div>
+                <div class="col-auto">
+                    <span class="fw-bolder">Engagement Info:</span><br>
+                    {{ engagement_instance.parent }}<br>
+                    {{ engagement_instance.provider }}<br>
+                    {{ engagement_instance.time_code }}<br>
+                    {{ engagement_instance.fye|date:"m/d/Y" }}
+                </div>
+
             </div>
-            <div class="col-4 rounded-2 srg-border px-2">
+        </div>
+
+        <div class="d-flex justify-content-evenly flex-row flex-xxl-wrap flex-xl-wrap flex-lg-wrap flex-md-wrap flex-sm-wrap p-2 table-responsive-md">
+            <div class="col-4 rounded-2 srg-border col-xxl-6 col-xl-12 col-lg-12 col-md-12 col-sm-12 col-xs-12 row">
+                <div class="col">
                 <h4 class="text-start fs-2 py-2 fw-normal srg-header" style="border-bottom: 1px solid #a9a9a9">Currently Assigned</h4>
-                {% for assignee in already_assigned %}
-                    {{ assignee.assignee }}<br>
-                {% endfor %}
+                <div class="row d-flex justify-content-evenly py-2 border">
+                    {% for assignee in already_assigned %}
+                        <div class="col-3 srg-border text-center srg-bg-secondary mx-1 my-2">
+                            {{ assignee.assignee }}
+                        </div>
+
+                    {% endfor %}
+                </div>
+
             </div>
         </div>
     </div>

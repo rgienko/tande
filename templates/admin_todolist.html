@@ -9,9 +9,73 @@
         </div>
     </div>
 
+
     <div class="row mt-4">
-    <div class="col-12 table-responsive">
-            <span class="srg-header fs-3">Next Week's Schedule</span>
+        <div class="col-8 py-4 border">
+            {% for d in todo_data %}
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th class="p-0" style="width:125px"></th>
+                            {% regroup d.todolist by employee as todolist_list %}
+                            {% for employee in todolist_list %}
+                                <th class="" style="width:100px">{{ employee.grouper }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tr>
+                        <td class="" style="width:125px">{{ d.todo_date }}</td>
+                        {% regroup d.todolist by employee as todolist_list %}
+                        {% for employee in todolist_list %}
+                            <td class="" style="width:100px">
+                                {% for item in employee.list %}
+                                    <div class="my-1 card">
+                                        {{ item.engagement }} {{ item.anticipated_hours }}<br>
+                                        {{ item.getProvider }} <br>
+                                        {{ item.getScope }}<br>
+                                    </div>
+                                {% endfor %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+
+                </table>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <div class="row mt-4">
+        <div class="col-auto">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        {% for emp in employees %}
+                            <th>{{ emp }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                {% for day in next_week_days %}
+                    <tr>
+                        <td>{{ day }}</td>
+                        <td>
+                            {% for rec in pivoted_data %}
+                                {% if rec.todo_date == day %}
+                                    {{ rec.employee__user__username }}<br>
+                                    {{ rec.todo_date }}<br>
+                                    {{ rec.engagement__srg_id }}<br>
+                                {% else %}
+                                {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    <div class="col-auto table-responsive">
+        <span class="srg-header fs-3">Next Week's Schedule</span>
         <table class="table table-bordered">
             <caption>Current To-Do List</caption>
                 <thead>
@@ -28,7 +92,7 @@
                         <td class="text-start">
                             {{ entry }}
                         </td>
-                        <td class="text-start text-nowrap">
+                        <td class="text-start">
                             {% for emp in entry.emp_todo_list_day_one %}
                                     {{ emp.engagement }}<br>
                                     {{ emp.getProvider }}<br>
@@ -37,7 +101,7 @@
                                     <hr class="m-1">
                             {% endfor %}
                         </td>
-                        <td class="text-start text-nowrap">
+                        <td class="text-start">
                             {% for emp in entry.emp_todo_list_day_two %}
                                     {{ emp.engagement }}<br>
                                     {{ emp.getProvider }}<br>
@@ -46,7 +110,7 @@
                                     <hr class="m-1">
                             {% endfor %}
                         </td>
-                        <td class="text-start text-nowrap">
+                        <td class="text-start">
                             {% for emp in entry.emp_todo_list_day_three %}
                                     {{ emp.engagement }}<br>
                                     {{ emp.getProvider }}<br>
@@ -55,7 +119,7 @@
                                     <hr class="m-1">
                             {% endfor %}
                         </td>
-                        <td class="text-start text-nowrap">
+                        <td class="text-start">
                             {% for emp in entry.emp_todo_list_day_four %}
                                     {{ emp.engagement }}<br>
                                     {{ emp.getProvider }}<br>
@@ -64,7 +128,7 @@
                                     <hr class="m-1">
                             {% endfor %}
                         </td>
-                        <td class="text-start text-nowrap">
+                        <td class="text-start">
                             {% for emp in entry.emp_todo_list_day_five %}
                                     {{ emp.engagement }}<br>
                                     {{ emp.getProvider }}<br>
@@ -79,6 +143,8 @@
 
         </div>
     </div>
+
+
 
         {% for engagement in unassigned_engagements %}
             <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="modal-{{ engagement.engagement }}-modal" aria-hidden="true">

@@ -41,22 +41,23 @@
                         <th>Date</th>
                         <th>Employee</th>
                         <th>Engagement ID</th>
+                        <th>Parent</th>
                         <th>Provider</th>
                         <th>Scope</th>
                         <th>Hours</th>
                         <th>Note</th>
-
                     </tr>
                 </thead>
                 {% for entry in filter.qs %}
                     <tr class="text-center align-middle">
                         <td class="">{{ entry.date|date:'m/d/Y' }}</td>
-                        <td class="">{{ entry.employee }}</td>
-                        <td class="">{{ entry.engagement }}</td>
-                        <td class="">{{ entry.getProvider }}</td>
-                        <td class="">{{ entry.getScope }}</td>
+                        <td class="text-start">{{ entry.employee__user__username }}</td>
+                        <td class="text-start">{{ entry.engagement__srg_id }}</td>
+                        <td class="text-start">{{ entry.engagement__parent__parent_name }}</td>
+                        <td class="text-start">{{ entry.engagement__provider }} - {{ entry.engagement__provider__provider_name }}</td>
+                        <td class="text-start">{{ entry.engagement__time_code }} - {{ entry.engagement__time_code__time_code_desc }}</td>
                         <td>{{ entry.hours }}</td>
-                        <td>{{ entry.note }}</td>
+                        <td class="text-start">{{ entry.note }}</td>
                     </tr>
                 {% endfor %}
             </table>

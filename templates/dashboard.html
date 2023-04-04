@@ -39,16 +39,17 @@
                 {% for engagement in all_engagements %}
                     <tr>
                         <td>
-                            <a class="srg-link" role="tab" id="list-{{ engagement.srg_id }}-list"
+                            <p>
+                            <a class="srg-link" role="tab" id="list-{{ engagement.engagement }}-list"
                                                     data-bs-toggle="list"
-                                                    aria-controls="{{ engagement.srg_id }}"
-                                                    href="#list-{{ engagement.srg_id }}">
-                                {{ engagement.srg_id }}
+                                                    aria-controls="{{ engagement.engagement }}"
+                                                    href="#list-{{ engagement.engagement }}">
+                                {{ engagement.engagement }}
                                 </a><br>
-                            {{ engagement.provider }}<br>
-                            {{ engagement.time_code }}<br>
-                            FYE: {{ engagement.fye|date:'m/d/Y' }}
-
+                            {{ engagement.getProvider }}<br>
+                            {{ engagement.getScope }}<br>
+                            FYE: {{ engagement.getFYE|date:'m/d/Y' }}
+                            </p>
                         </td>
                     </tr>
 
@@ -61,7 +62,7 @@
 
             <div class="tab-content" id="nav-tabContent">
                 {% for engagement in all_engagements %}
-                    <div class="tab-pane" id="list-{{ engagement.srg_id }}" role="tabpanel" aria-labelledby="list-{{ engagement.srg_id }}-list">
+                    <div class="tab-pane" id="list-{{ engagement.engagement }}" role="tabpanel" aria-labelledby="list-{{ engagement.engagement }}-list">
                         <div class="card border shadow-sm p-2 srg-bg-secondary rounded">
                             <div class="row">
                                 <div class="col-xxl-2 col-xl-3 col-lg-3 col-md-3 fw-bolder">
@@ -74,11 +75,11 @@
                                     Hours Recorded:<br>
                                 </div>
                                 <div class="col-xxl-10 col-xl-9 col-lg-9 col-md-9">
-                                    {{ engagement.srg_id}}<br>
-                                    {{ engagement.provider }}<br>
-                                    {{ engagement.parent }}<br>
-                                    {{ engagement.time_code }}<br>
-                                    {{ engagement.fye|date:'m/d/Y' }}<br>
+                                    {{ engagement.engagement}}<br>
+                                    {{ engagement.getProvider }}<br>
+                                    {{ engagement.getParent }}<br>
+                                    {{ engagement.getScope }}<br>
+                                    {{ engagement.getFYE|date:'m/d/Y' }}<br>
                                     {{ engagement.getTCBudget }}<br>
                                     {{ engagement.engagement_hours.project_hours }}<br>
                                 </div>
@@ -88,9 +89,9 @@
                                 {% if engagement.is_complete is True %}
                                     {% if user.is_staff %}
                                         <a type="button" class="text-decoration-none srg-link"
-                                        id="expense-modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
-                                        data-bs-target="#complete-modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
-                                        href="#complete-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                        id="expense-modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
+                                        data-bs-target="#complete-modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
+                                        href="#complete-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
                                         <i class="bi bi-check-circle"></i> Open Project
                                     </a>
                                     {% else %}
@@ -99,37 +100,39 @@
                                 {% else %}
                                     {% if user.is_staff %}
                                         <a type="button" class="text-decoration-none open-modal-button srg-btn-primary"
-                                           id="modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
-                                           data-bs-target="#modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
-                                           href="#modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                           id="modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
+                                           href="#modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
                                                 <i class="bi bi-clock"></i> Record Time
                                         </a>
                                         <a type="button" class="text-decoration-none srg-success-button mx-3"
-                                           id="expense-modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
-                                           data-bs-target="#expense-modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
-                                           href="#expense-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                           id="expense-modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#expense-modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
+                                           href="#expense-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
                                                 <i class="bi bi-currency-dollar"></i> Record Expense
                                         </a>
+                                        <!--
                                         <a href="{% url 'add-assignments' engagement.engagement_id %}" type="button" class="text-decoration-none srg-btn-primary me-3">
                                             <i class="bi bi-person-add"></i> Assign
                                         </a>
+                                        -->
                                         <a type="button" class="text-decoration-none srg-link"
-                                            id="expense-modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
-                                            data-bs-target="#complete-modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
-                                            href="#complete-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                            id="expense-modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
+                                            data-bs-target="#complete-modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
+                                            href="#complete-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
                                             <i class="bi bi-check-circle"></i> {% if engagement.is_complete is True %}Open Project{% else %}Close Project{% endif %}
                                         </a>
                                     {% else %}
                                         <a type="button" class="text-decoration-none open-modal-button srg-btn-primary"
-                                           id="modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
-                                           data-bs-target="#modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
-                                           href="#modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                           id="modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
+                                           href="#modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
                                                 <i class="bi bi-clock"></i> Record Time
                                         </a>
                                         <a type="button" class="text-decoration-none srg-success-button mx-3"
-                                           id="expense-modal-{{ engagement.srg_id }}-modal" data-bs-toggle="modal"
-                                           data-bs-target="#expense-modal-{{ forloop.counter }}" data-id="{{ engagement.srg_id }}"
-                                           href="#expense-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.srg_id }}">
+                                           id="expense-modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#expense-modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
+                                           href="#expense-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
                                                 <i class="bi bi-currency-dollar"></i> Record Expense
                                         </a>
                                     {% endif %}
@@ -162,19 +165,19 @@
         </div>
 
         {% for engagement in all_engagements %}
-            <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="modal-{{ engagement.srg_id }}-modal" aria-hidden="true">
+            <div class="modal fade" id="modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="modal-{{ engagement.engagement }}-modal" aria-hidden="true">
                 <div class="modal-dialog" id="modal">
                     <div class="modal-content">
                         <div class="modal-header srg-bg-primary text-light fs-4">
                             Record Hours
                         </div>
                         <div class="modal-body">
-                            ID: <span id="object-id-{{ forloop.counter }}">{{ engagement.srg_id}}</span>
+                            ID: <span id="object-id-{{ forloop.counter }}">{{ engagement.engagement}}</span>
 
                             <form class="" method="POST">
                                 {% csrf_token %}
                                     <label for="my-input-{{ forloop.counter }}">Engagement:</label><br>
-                                    <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.srg_id }}"/><br>
+                                    <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.engagement }}"/><br>
                                 {% for field in add_time_form %}
                                     <div class="fieldWrapper mb-3">
                                         {{ field.label_tag }} <br>{{ field }}
@@ -193,7 +196,7 @@
         {% endfor %}
 
         {% for engagement in all_engagements %}
-            <div class="modal fade" id="expense-modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="expense-modal-{{ engagement.srg_id }}-modal" aria-hidden="true">
+            <div class="modal fade" id="expense-modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="expense-modal-{{ engagement.engagement }}-modal" aria-hidden="true">
                 <div class="modal-dialog" id="modal">
                     <div class="modal-content">
                         <div class="modal-header srg-bg-success text-light fs-5">
@@ -203,7 +206,7 @@
                             <form class="" method="POST">
                                 {% csrf_token %}
                                     <label for="my-input-{{ forloop.counter }}">Engagement:</label><br>
-                                    <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.srg_id }}"/><br>
+                                    <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.engagement }}"/><br>
                                 {% for field in add_expense_form %}
                                     <div class="fieldWrapper my-3">
                                         {{ field.label_tag }} <br>{{ field }}
@@ -220,7 +223,7 @@
                 </div>
             </div>
 
-            <div class="modal fade" id="complete-modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="complete-modal-{{ engagement.srg_id }}-modal" aria-hidden="true">
+            <div class="modal fade" id="complete-modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="complete-modal-{{ engagement.engagement }}-modal" aria-hidden="true">
                 <div class="modal-dialog" id="modal">
                     <div class="modal-content">
                         <div class="modal-header srg-bg-primary text-light fs-5">
@@ -230,7 +233,7 @@
                             <form class="" method="POST">
                                 {% csrf_token %}
                                     <label for="my-input-{{ forloop.counter }}">Engagement:</label><br>
-                                    <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.srg_id }}"/><br>
+                                    <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.engagement }}"/><br>
                                 {% for field in complete_engagement_form %}
                                     <div class="fieldWrapper my-3">
                                         {{ field.label_tag }} {{ field }}
@@ -287,7 +290,7 @@
 
           // Loop through all list items, and hide those who don't match the search query
             for (i = 0; i < li.length; i++) {
-                a = li[i].getElementsByTagName("a")[0];
+                a = li[i].getElementsByTagName("p")[0];
                 txtValue = a.textContent || a.innerText;
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
                     li[i].style.display = "";

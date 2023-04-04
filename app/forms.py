@@ -87,7 +87,7 @@ class TodoForm(forms.ModelForm):
 
         widgets = {
             'note': forms.Textarea(attrs={'rows': 5, 'cols': 40}),
-            'start_date': DatePickerInput()
+            'todo_date': DatePickerInput()
         }
 
 

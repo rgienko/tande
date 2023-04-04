@@ -3,6 +3,7 @@ from datetime import date
 from django.db import models
 from django.contrib.auth.models import User
 import uuid
+from django.core.cache import cache
 
 
 # Create your models here.
@@ -100,8 +101,14 @@ class Assignments(models.Model):
     def getProvider(self):
         return self.engagement.provider
 
+    def getParent(self):
+        return self.engagement.provider.parent
+
     def getFYE(self):
         return self.engagement.fye
+
+    def getTCBudget(self):
+        return str(self.engagement.time_code.time_code_hours)
 
 
 class Time(models.Model):
@@ -125,6 +132,9 @@ class Time(models.Model):
 
     def getProvider(self):
         return self.engagement.provider
+
+    def getParent(self):
+        return self.engagement.provider.parent
 
     def getScope(self):
         return self.engagement.time_code
