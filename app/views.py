@@ -352,38 +352,26 @@ class TodolistViewAdmin(LoginRequiredMixin, TemplateView):
             next_week_days.append(next_day + timedelta(days=7))
 
     def get(self, *args, **kwargs):
-        current_todolist = Todolist.objects.all().filter(todo_date__gte=self.today)
+        srg_todo_list = Todolist.objects.filter(todo_date__year=2023).order_by('employee__user__username')
         employees = Employee.objects.all().order_by('user__first_name')
 
-        todo_data = []
-
-        for d in self.next_week_days:
-            my_dict_one = {'todo_date': d}
-            # d['todolist'] = Todolist.objects.filter(todo_date=d)
-            # todolist = todolist.values('todo_date', 'employee', 'engagement')
-            todo_data.append(my_dict_one)
-
-        for item in todo_data:
-            item['todolist'] = Todolist.objects.filter(todo_date=item['todo_date']).order_by('employee__user__username')
-
         for emp in employees:
-            emp.emp_todo_list_day_one = current_todolist.filter(employee__user_id=emp.user_id).filter(
+            emp.emp_todo_list_day_one = srg_todo_list.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=7))
-            emp.emp_todo_list_day_two = current_todolist.filter(employee__user_id=emp.user_id).filter(
+            emp.emp_todo_list_day_two = srg_todo_list.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=8))
-            emp.emp_todo_list_day_three = current_todolist.filter(employee__user_id=emp.user_id).filter(
+            emp.emp_todo_list_day_three = srg_todo_list.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=9))
-            emp.emp_todo_list_day_four = current_todolist.filter(employee__user_id=emp.user_id).filter(
+            emp.emp_todo_list_day_four = srg_todo_list.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=10))
-            emp.emp_todo_list_day_five = current_todolist.filter(employee__user_id=emp.user_id).filter(
+            emp.emp_todo_list_day_five = srg_todo_list.filter(employee__user_id=emp.user_id).filter(
                 todo_date=self.week_beg + timedelta(days=11))
 
-        srg_todo_list = Todolist.objects.filter(todo_date__year=2023).order_by('employee__user__username')
-        print(srg_todo_list)
+        # srg_todo_list = Todolist.objects.filter(todo_date__year=2023).order_by('employee__user__username')
+        # print(srg_todo_list)
 
         context = {'today': self.today, 'week_beg': self.week_beg, 'week_end': self.week_end,
-                   'next_week_days': self.next_week_days, 'current_todolist': current_todolist,
-                   'employees': employees, 'todo_data': todo_data, 'srg_todo_list': srg_todo_list}
+                   'next_week_days': self.next_week_days, 'employees': employees, 'srg_todo_list': srg_todo_list}
 
         return self.render_to_response(context)
 
