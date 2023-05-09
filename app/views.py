@@ -1,5 +1,6 @@
 import datetime
 import os
+import random
 from datetime import timedelta
 
 import pandas
@@ -205,7 +206,7 @@ class Dashboard(LoginRequiredMixin, TemplateView):
 
 class AdminDashboard(LoginRequiredMixin, TemplateView):
     login_url = '/login'
-    template_name = 'admin_dashboard.html'
+    template_name = 'admin_dashboard_v2.html'
 
     today = date.today()
     week_beg = today - timedelta(days=today.weekday())
@@ -217,7 +218,7 @@ class AdminDashboard(LoginRequiredMixin, TemplateView):
         all_parents = Parent.objects.all()
 
         for parent in all_parents:
-            parent.parent_engagements = Engagement.objects.filter(parent=parent.parent_id)
+            parent.parent_engagements = Engagement.objects.filter(parent=parent.parent_id).order_by('-fye','-engagement_id')
 
             for engagement in parent.parent_engagements:
                 engagement_time_sheet_entries = Time.objects.filter(engagement=engagement.engagement_id)
@@ -239,6 +240,23 @@ class AdminDashboard(LoginRequiredMixin, TemplateView):
                    'week_end': self.week_end, 'all_parents': all_parents}
 
         return self.render_to_response(context)
+
+
+@login_required(login_url='/login')
+def AdminEngagementDetail(request, pk):
+    engagement_instance = get_object_or_404(Engagement, pk=pk)
+    engagement_time_entries = Time.objects.filter(engagement=engagement_instance.engagement_id)
+    engagement_hours_by_employee = engagement_time_entries.values('employee__user__username').annotate(emp_hours=Sum('hours'))
+    for emp in engagement_hours_by_employee:
+        emp['color'] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    engagement_hours = engagement_time_entries.aggregate(ehours=Sum('hours'))
+    variance = engagement_instance.budget_hours - engagement_hours['ehours']
+
+    context = {'engagement_instance': engagement_instance, 'engagement_time_entries': engagement_time_entries,
+               'engagement_hours': engagement_hours, 'variance': variance,
+               'engagement_hours_by_employee': engagement_hours_by_employee}
+
+    return render(request, 'admin_engagement_detail.html', context)
 
 
 class Timesheet(LoginRequiredMixin, TemplateView):
@@ -422,7 +440,10 @@ def createAssignments(request, pk):
             new_assignment = form.save(commit=False)
             new_assignment.save()
 
-            return redirect('dashboard')
+            if request.user.is_staff:
+                return redirect('admin-dashboard')
+            else:
+                return redirect('dashboard')
 
     elif request.method == 'POST' and 'assign_another_button' in request.POST:
         form = AssignmentForm(request.POST)

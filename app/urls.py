@@ -21,12 +21,13 @@ from app import views
 
 urlpatterns = [
     path("login/", views.login, name='login'),
-    path("logout/", auth_views.LogoutView.as_view(template_name='login.html'), name='logout'),
+    path("logout/", auth_views.LogoutView.as_view(template_name='logout.html'), name='logout'),
     path("register/", views.register, name='register'),
     path("reset-password/", views.resetPassword, name='reset-password'),
     path("reset-password/done", views.resetPassword, name='reset-password'),
     path("dashboard/", views.Dashboard.as_view(), name='dashboard'),
     path("dashboard_admin/", views.AdminDashboard.as_view(), name='admin-dashboard'),
+    path("admin_engagement_detail/<pk>/", views.AdminEngagementDetail, name='admin-engagement-detail'),
     path("timesheet/", views.Timesheet.as_view(), name='timesheet'),
     path("expense/", views.Expenses.as_view(), name='expense'),
     path("timesheet/edit/<pk>/", views.editTimesheet, name='edit-timesheet'),

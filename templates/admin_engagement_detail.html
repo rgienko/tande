@@ -1,0 +1,104 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="row d-flex justify-content-between">
+        <div class="col-4 card p-2 ps-4 srg-header srg-bg-secondary rounded-4">
+            <h3 class="fw-normal">Engagement Details</h3>
+            <h5 class="fw-normal">ID: {{ engagement_instance.srg_id }}</h5>
+            <h5 class="fw-normal">TC: {{ engagement_instance.time_code }}</h5>
+            <h5 class="fw-normal">P#: {{ engagement_instance.provider }}</h5>
+            <h5 class="fw-normal">PT: {{ engagement_instance.parent }}</h5>
+            <h5 class="fw-normal">FY: {{ engagement_instance.fye|date:'m/d/Y' }}</h5>
+        </div>
+        <div class="col-6 card d-flex text-end">
+            <h3 class="fw-normal srg-header">Engagement Actions</h3>
+            {% if user.is_staff %}
+                <a href="{% url 'add-assignments' engagement_instance.engagement_id %}" class="srg-link ">
+                    <i class="fs-5 bi bi-plus-square"></i>
+                    <span class="ms-2 fs-5"> Assign Staff</span>
+                </a>
+            {% else %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row d-flex justify-content-around gap-2 py-4 srg-bg-secondary srg-border mt-4">
+
+        <div class="col-2 square srg-header border">
+            <div class="card rounded-4 text-center p-5 srg-bg-primary text-light">
+                <h3 class="fw-normal">Hours</h3>
+                <h1 class="fw-normal">{{ engagement_hours.ehours }}</h1>
+            </div>
+        </div>
+        <div class="col-2 srg-header border">
+            <div class="card rounded-4 text-center p-5 srg-bg-primary text-light">
+                <h3 class="fw-normal">Budget</h3>
+                <h1 class="fw-normal">{{ engagement_instance.budget_hours }}</h1>
+            </div>
+        </div>
+        <div class="col-2 srg-header border">
+            <div class="card rounded-4 text-center p-5 text-light {% if variance >= 0  %}srg-bg-success{% else %}srg-bg-danger{% endif %}">
+                <h3 class="fw-normal">Variance</h3>
+                <h1 class="fw-normal">{{ variance }}</h1>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row d-flex justify-content-start mt-4 px-2">
+        <div class="col-6 srg-header py-3 srg-bg-secondary rounded-4">
+            <h3 class="fw-normal">Hours By Employee</h3>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+            <canvas class="my-4 w-100 text-light" id="myChart" width="900" height="380"></canvas>
+            <script>
+                    const config = {
+                        type: 'bar',
+                        data: {
+                            labels: [{% for emp in engagement_hours_by_employee %}'{{ emp.employee__user__username|safe }}', {% endfor %}],
+                            datasets: [{
+                                backgroundColor: [{% for emp in engagement_hours_by_employee %}'rgb{{ emp.color|safe }}', {% endfor %}],
+                                borderColor: [{% for emp in engagement_hours_by_employee %}'rgb{{ emp.color|safe }}', {% endfor %}],
+                                data: [{% for emp in engagement_hours_by_employee %}{{ emp.emp_hours }}, {% endfor %}],
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            indexAxis:'y',
+                            plugins: {
+                              legend: {
+                                  display: false
+                              }
+                            },
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        fontColor: "black",
+                                        beginAtZero: true
+                                    },
+                                    gridLines: {
+                                        color:"rgb(56, 60, 74)"
+                                    }
+                                }],
+                                xAxes: [{
+                                    ticks: {
+                                        fontColor: "black"
+                                    },
+                                    gridLines: {
+                                        color:"rgb(56, 60, 74)"
+                                    }
+                                }]
+                            }
+                        }
+                    };
+                    window.onload = function () {
+                        const ctx = document.getElementById('myChart').getContext('2d');
+                        window.myLine = new Chart(ctx, config);
+
+                    }
+                </script>
+
+
+        </div>
+    </div>
+
+{% endblock %}
