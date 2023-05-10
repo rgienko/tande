@@ -17,7 +17,6 @@ class EngagementForm(forms.ModelForm):
             'start_date': DatePickerInput
         }
 
-
 class CompleteEngagementForm(forms.ModelForm):
     class Meta:
         model = Engagement

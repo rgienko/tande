@@ -24,6 +24,14 @@
     color: #02308C
 }
 
+.srg-header-danger {
+    color: #8B0000
+}
+
+.srg-header-success {
+    color: #004000
+}
+
 .srg-bg-p {
     background: red;
     border: 1px solid orange;

@@ -223,13 +223,13 @@ class AdminDashboard(LoginRequiredMixin, TemplateView):
             for engagement in parent.parent_engagements:
                 engagement_time_sheet_entries = Time.objects.filter(engagement=engagement.engagement_id)
 
-                engagement_time_sheet_by_employee = engagement_time_sheet_entries.values('employee__user__username',
-                                                                                         'employee__rate').annotate(
-                    engagement_emp_hours=Sum('hours')).order_by('-engagement_emp_hours')
+                # engagement_time_sheet_by_employee = engagement_time_sheet_entries.values('employee__user__username',
+                #                                                                         'employee__rate').annotate(
+                #    engagement_emp_hours=Sum('hours')).order_by('-engagement_emp_hours')
 
                 # engagement.staff = Assignments.objects.filter(engagement=engagement.engagement_id)
 
-                engagement.engagement_time_sheet_entries = engagement_time_sheet_by_employee
+                # engagement.engagement_time_sheet_entries = engagement_time_sheet_by_employee
 
                 engagement_total_hours = engagement_time_sheet_entries.aggregate(
                     project_hours=Sum('hours'))
@@ -246,11 +246,27 @@ class AdminDashboard(LoginRequiredMixin, TemplateView):
 def AdminEngagementDetail(request, pk):
     engagement_instance = get_object_or_404(Engagement, pk=pk)
     engagement_time_entries = Time.objects.filter(engagement=engagement_instance.engagement_id)
-    engagement_hours_by_employee = engagement_time_entries.values('employee__user__username').annotate(emp_hours=Sum('hours'))
+    engagement_hours_by_employee = engagement_time_entries.values('employee__user__username').annotate(emp_hours=Sum('hours')).order_by('-emp_hours')
     for emp in engagement_hours_by_employee:
         emp['color'] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+
     engagement_hours = engagement_time_entries.aggregate(ehours=Sum('hours'))
+    if engagement_hours['ehours'] is None:
+        engagement_hours['ehours'] = 0
+
     variance = engagement_instance.budget_hours - engagement_hours['ehours']
+
+    if request.method == 'POST' and 'confirm-button' in request.POST:
+        if engagement_instance.is_complete is True:
+            engagement_instance.is_complete = False
+            engagement_instance.save()
+        else:
+            engagement_instance.is_complete = True
+            engagement_instance.save()
+    elif request.method == 'POST' and 'save_notes' in request.POST:
+        updated_notes = request.POST.get('save_notes')
+        engagement_instance.notes = updated_notes
+        engagement_instance.save()
 
     context = {'engagement_instance': engagement_instance, 'engagement_time_entries': engagement_time_entries,
                'engagement_hours': engagement_hours, 'variance': variance,

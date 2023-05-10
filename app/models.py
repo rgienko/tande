@@ -73,6 +73,7 @@ class Engagement(models.Model):
     provider = models.ForeignKey(Provider, on_delete=models.CASCADE)
     time_code = models.ForeignKey(Timecode, on_delete=models.CASCADE)
     type = models.ForeignKey(Type, on_delete=models.CASCADE)
+    notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.srg_id
@@ -165,7 +166,6 @@ class Todolist(models.Model):
 
     def getEmployeeInitials(self):
         return self.employee.user.first_name[:1] + self.employee.user.last_name[:1]
-
 
 
 class ExpenseCategory(models.Model):
