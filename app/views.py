@@ -609,3 +609,48 @@ def adminTS(request):
 
     context = {'filter': f, 'today': today, 'week_beg': week_beg, 'week_end': week_end}
     return render(request, 'admin_timesheet.html', context)
+
+
+@login_required(login_url='/loging')
+def timeCodes(request):
+    time_codes = Timecode.objects.all().order_by('time_code')
+
+    context = {'time_codes': time_codes}
+
+    return render(request, 'timecodes.html', context)
+
+
+def newTimeCode(request):
+    if request.method == 'POST':
+        create_form = NewTimeCodeForm(request.POST)
+
+        if create_form.is_valid():
+            new_timecode = create_form.save(commit=False)
+            new_timecode.save()
+
+            return redirect('timecodes')
+    else:
+        create_form = EditTimeCodeForm()
+
+    context = {'formName': 'Edit Time Code', 'create_form': create_form}
+
+    return render(request, 'create.html', context)
+
+
+def editTimeCode(request, pk):
+    timecode_instance = get_object_or_404(Timecode, pk=pk)
+
+    if request.method == 'POST':
+        edit_form = EditTimeCodeForm(request.POST, instance=timecode_instance)
+
+        if edit_form.is_valid():
+            timecode_instance = edit_form.save(commit=False)
+            timecode_instance.save()
+
+            return redirect('timecodes')
+    else:
+        edit_form = EditTimeCodeForm(instance=timecode_instance)
+
+    context = {'formName': 'Edit Time Code', 'edit_form': edit_form}
+
+    return render(request, 'edit.html', context)

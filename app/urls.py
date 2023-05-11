@@ -37,5 +37,8 @@ urlpatterns = [
     path("create-engagement/", views.createEngagement, name='create-engagement'),
     path("add-assignments/<pk>/", views.createAssignments, name='add-assignments'),
     path("dashboard/engagements/", views.EngagementDashboard.as_view(), name='dashboard-engagements'),
+    path("timecodes/", views.timeCodes, name='timecodes'),
+    path("timecodes/edit/<pk>/", views.editTimeCode, name='edit-timecode'),
+    path("timecodes/new/", views.newTimeCode, name='new-timecode'),
 
 ]

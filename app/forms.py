@@ -72,6 +72,42 @@ class EditTimeForm(forms.ModelForm):
         }
 
 
+class NewTimeCodeForm(forms.ModelForm):
+    class Meta:
+        model = Timecode
+
+        fields = ['time_code','time_code_desc', 'time_code_hours']
+
+        labels = {
+            'time_code': _('Time Code'),
+            'time_code_desc': _('Description'),
+            'time_code_hours': _('Hours Budget')
+        }
+
+        widgets = {
+            'time_code': forms.TextInput(attrs={'size': 5}),
+            'time_code_desc': forms.TextInput(attrs={'size': 75}),
+            'time_code_hours': forms.TextInput(attrs={'size': 5})
+        }
+
+
+class EditTimeCodeForm(forms.ModelForm):
+    class Meta:
+        model = Timecode
+
+        fields = ['time_code_desc', 'time_code_hours']
+
+        labels = {
+            'time_code_desc': _('Description'),
+            'time_code_hours': _('Hours Budget')
+        }
+
+        widgets = {
+            'time_code_desc': forms.TextInput(attrs={'size': 75}),
+            'time_code_hours': forms.TextInput(attrs={'size': 5})
+        }
+
+
 class TodoForm(forms.ModelForm):
     class Meta:
         model = Todolist
