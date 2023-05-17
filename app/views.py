@@ -22,9 +22,8 @@ from django.core.cache import cache
 import calendar
 from calendar import HTMLCalendar
 
-
 from django.contrib.auth.mixins import LoginRequiredMixin
-# from sendgrid import SendGridAPIClient
+from sendgrid import SendGridAPIClient
 
 from .filters import TimesheetFilter
 from .forms import *
@@ -72,6 +71,41 @@ def register(request):
         pass
 
     return render(request, 'register.html')
+
+
+def overBudgetAlert(pk):
+    SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY')
+    engagement_instance = get_object_or_404(Engagement, pk=pk)
+
+    engagement_id = engagement_instance.srg_id
+    engagement_provider = str(engagement_instance.provider_id) + "-" + engagement_instance.getProviderName()
+    engagement_scope = str(engagement_instance.time_code_id) + "-" + engagement_instance.getTCDesc()
+    # engagement_budget = engagement_instance.budget_hours
+    engagement_fye = str(engagement_instance.fye)
+
+    msg = EmailMessage(
+        from_email='Randall.Gienko@srgroupllc.com',
+        to=['Randall.Gienko@srgroupllc.com']
+    )
+
+    protocol = 'http://'
+    engagement_url = 'localhost:8000/admin_engagement_detail/' + str(engagement_instance.engagement_id) + '/'
+    msg.template_id = "d-72ebc0569ab6402fa236d9cdc75a860b"
+    msg.dynamic_template_data = {
+        "title": 'Engagement Over Budget',
+        "protocol": protocol,
+        "engagement_url": engagement_url,
+        "engagement_id": engagement_id,
+        "engagement_provider": engagement_provider,
+        "engagement_scope": engagement_scope,
+        # "engagement_budget": engagement_budget,
+        "engagement_fye": engagement_fye
+    }
+
+    # msg.SendGridAPIClient(SENDGRID_API_KEY)
+    msg.send(fail_silently=False)
+    # sg = SendGridAPIClient(SENDGRID_API_KEY)
+    # response = sg.send(msg)
 
 
 def resetPassword(request):
@@ -174,7 +208,6 @@ class Dashboard(LoginRequiredMixin, TemplateView):
         add_time_form = TimeForm(self.request.POST)
         add_expense_form = ExpenseForm(self.request.POST)
         complete_engagement_form = CompleteEngagementForm(self.request.POST, instance=engagement_instance)
-
         print(employee_instance)
 
         if add_time_form.is_valid():
@@ -183,6 +216,13 @@ class Dashboard(LoginRequiredMixin, TemplateView):
             # new_entry.date = self.today
             new_entry.engagement = engagement_instance
             new_entry.save()
+
+            engagement_hours = Time.objects.filter(engagement=engagement_instance.engagement_id).aggregate(
+                ehours=Sum('hours'))
+
+            if engagement_instance.budget_hours - engagement_hours['ehours'] <= 0:
+                overBudgetAlert(engagement_instance.engagement_id)
+
             return redirect(reverse_lazy('dashboard'))
 
         elif add_expense_form.is_valid():
@@ -218,7 +258,8 @@ class AdminDashboard(LoginRequiredMixin, TemplateView):
         all_parents = Parent.objects.all()
 
         for parent in all_parents:
-            parent.parent_engagements = Engagement.objects.filter(parent=parent.parent_id).order_by('-fye','-engagement_id')
+            parent.parent_engagements = Engagement.objects.filter(parent=parent.parent_id).order_by('-fye',
+                                                                                                    '-engagement_id')
 
             for engagement in parent.parent_engagements:
                 engagement_time_sheet_entries = Time.objects.filter(engagement=engagement.engagement_id)
@@ -245,16 +286,50 @@ class AdminDashboard(LoginRequiredMixin, TemplateView):
 @login_required(login_url='/login')
 def AdminEngagementDetail(request, pk):
     engagement_instance = get_object_or_404(Engagement, pk=pk)
+    employee_instance = get_object_or_404(Employee, user_id=request.user.id)
     engagement_time_entries = Time.objects.filter(engagement=engagement_instance.engagement_id)
-    engagement_hours_by_employee = engagement_time_entries.values('employee__user__username').annotate(emp_hours=Sum('hours')).order_by('-emp_hours')
-    for emp in engagement_hours_by_employee:
-        emp['color'] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    engagement_todo_entries = Todolist.objects.filter(engagement=engagement_instance.engagement_id)
+    engagement_assignments = Assignments.objects.filter(engagement=engagement_instance.engagement_id).values(
+        'assignee__username', 'assignee')
 
-    engagement_hours = engagement_time_entries.aggregate(ehours=Sum('hours'))
-    if engagement_hours['ehours'] is None:
-        engagement_hours['ehours'] = 0
+    billable_engagement_time_entries = engagement_time_entries.filter(time_type_id='B')
+    non_billable_engagement_time_entries = engagement_time_entries.filter(time_type_id='N')
 
-    variance = engagement_instance.budget_hours - engagement_hours['ehours']
+    for emp in engagement_assignments:
+        emp['billable_hours'] = billable_engagement_time_entries.filter(employee=emp['assignee']).aggregate(
+            bhours=Sum('hours'))
+
+        non_billable_hours = non_billable_engagement_time_entries.filter(employee=emp['assignee']).aggregate(
+            nbhours=Sum('hours'))
+
+        if non_billable_hours['nbhours'] is None:
+            emp['non_billable_hours'] = 0
+        else:
+            emp['non_billable_hours'] = non_billable_hours['nbhours']
+
+        engagement_todo_hours = engagement_todo_entries.filter(employee=emp['assignee']).aggregate(
+            tdhours=Sum('anticipated_hours'))
+
+        if engagement_todo_hours['tdhours'] is None:
+            emp['engagement_todo_hours'] = 0
+        else:
+            emp['engagement_todo_hours'] = engagement_todo_hours['tdhours']
+
+        if emp['billable_hours']['bhours'] is None:
+            emp['billable_hours']['bhours'] = 0
+        else:
+            pass
+        emp['tstd_variance'] = emp['engagement_todo_hours'] - emp['billable_hours']['bhours']
+
+    billable_engagement_hours = billable_engagement_time_entries.aggregate(ehours=Sum('hours'))
+    non_billable_engagement_hours = non_billable_engagement_time_entries.aggregate(ehours=Sum('hours'))
+
+    if billable_engagement_hours['ehours'] is None:
+        billable_engagement_hours['ehours'] = 0
+
+    variance = engagement_instance.budget_hours - billable_engagement_hours['ehours']
+
+    add_time_form = TimeForm(request.POST)
 
     if request.method == 'POST' and 'confirm-button' in request.POST:
         if engagement_instance.is_complete is True:
@@ -263,14 +338,24 @@ def AdminEngagementDetail(request, pk):
         else:
             engagement_instance.is_complete = True
             engagement_instance.save()
+
+    elif request.method == 'POST' and 'add-hours-button' in request.POST:
+        if add_time_form.is_valid():
+            new_entry = add_time_form.save(commit=False)
+            new_entry.employee = employee_instance
+            # new_entry.date = self.today
+            new_entry.engagement = engagement_instance
+            new_entry.save()
+            return redirect('admin-engagement-detail', engagement_instance.engagement_id)
     elif request.method == 'POST' and 'save_notes' in request.POST:
         updated_notes = request.POST.get('save_notes')
         engagement_instance.notes = updated_notes
         engagement_instance.save()
 
     context = {'engagement_instance': engagement_instance, 'engagement_time_entries': engagement_time_entries,
-               'engagement_hours': engagement_hours, 'variance': variance,
-               'engagement_hours_by_employee': engagement_hours_by_employee}
+               'billable_engagement_hours': billable_engagement_hours, 'variance': variance,
+               'non_billable_engagement_hours': non_billable_engagement_hours, 'add_time_form': add_time_form,
+               'engagement_todo_entries': engagement_todo_entries, 'engagement_assignments': engagement_assignments}
 
     return render(request, 'admin_engagement_detail.html', context)
 
@@ -332,7 +417,8 @@ class TodolistView(LoginRequiredMixin, TemplateView):
 
     def get(self, *args, **kwargs):
         assigned_engagements = Assignments.objects.select_related('engagement').filter(assignee=self.request.user.id)
-        current_todolist = Todolist.objects.filter(employee__user_id=self.request.user.id).filter(todo_date__gte=self.week_beg)
+        current_todolist = Todolist.objects.filter(employee__user_id=self.request.user.id).filter(
+            todo_date__gte=self.week_beg)
         add_todo_form = TodoForm(self.request.POST)
 
         context = {'today': self.today, 'week_beg': self.week_beg, 'week_end': self.week_end,
@@ -654,3 +740,23 @@ def editTimeCode(request, pk):
     context = {'formName': 'Edit Time Code', 'edit_form': edit_form}
 
     return render(request, 'edit.html', context)
+
+
+def editEngagement(request, pk):
+    engagement_instance = get_object_or_404(Engagement, pk=pk)
+
+    if request.method == 'POST':
+        edit_form = EditEngagementForm(request.POST, instance=engagement_instance)
+
+        if edit_form.is_valid():
+            engagement_instance = edit_form.save(commit=False)
+            engagement_instance.save()
+
+            return redirect('admin-engagement-detail', pk)
+    else:
+        edit_form = EditEngagementForm(instance=engagement_instance)
+
+    context = {'formName': 'Edit Engagement', 'edit_form': edit_form}
+
+    return render(request, 'edit.html', context)
+

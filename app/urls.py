@@ -28,6 +28,7 @@ urlpatterns = [
     path("dashboard/", views.Dashboard.as_view(), name='dashboard'),
     path("dashboard_admin/", views.AdminDashboard.as_view(), name='admin-dashboard'),
     path("admin_engagement_detail/<pk>/", views.AdminEngagementDetail, name='admin-engagement-detail'),
+    path("edit_engagement/<pk>/", views.editEngagement, name='edit-engagement'),
     path("timesheet/", views.Timesheet.as_view(), name='timesheet'),
     path("expense/", views.Expenses.as_view(), name='expense'),
     path("timesheet/edit/<pk>/", views.editTimesheet, name='edit-timesheet'),

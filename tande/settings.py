@@ -19,6 +19,7 @@ environ.Env.read_env()
 
 SENDGRID_API_KEY = env('SENDGRID_KEY')
 EMAIL_BACKEND = "sendgrid_backend.SendgridBackend"
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 SENDGRID_SANDBOX_MODE_IN_DEBUG = False
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

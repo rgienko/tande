@@ -18,6 +18,19 @@ class EngagementForm(forms.ModelForm):
         }
 
 
+class EditEngagementForm(forms.ModelForm):
+    class Meta:
+        model = Engagement
+
+        fields = ['provider', 'parent', 'start_date',
+                  'time_code', 'budget_hours', 'fye', 'type', 'srg_id']
+
+        widgets = {
+            'fye': DatePickerInput,
+            'start_date': DatePickerInput
+        }
+
+
 class CompleteEngagementForm(forms.ModelForm):
     class Meta:
         model = Engagement

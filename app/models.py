@@ -87,6 +87,9 @@ class Engagement(models.Model):
     def getTCBudget(self):
         return str(self.time_code.time_code_hours)
 
+    def getTCDesc(self):
+        return self.time_code.time_code_desc
+
 
 class Assignments(models.Model):
     assignment_id = models.AutoField(primary_key=True, blank=False, null=False)
