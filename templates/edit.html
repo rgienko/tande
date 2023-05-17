@@ -1,0 +1,33 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <!-- This is generic html page for simple edit form.  If model is more complex a separate page may be required -->
+
+    <div class="container-fluid mt-4">
+        <div class="d-flex justify-content-evenly flex-row flex-xl-nowrap flex-lg-wrap flex-md-wrap flex-sm-wrap my-4 p-2 table-responsive-md">
+            <div class="flex-xl-grow-0 flex-md-grow-1 rounded-4 p-0 card shadow">
+                <div class="card-header srg-bg-primary rounded-4 rounded-bottom-0 border-bottom-0 text-light pb-0">
+                    <h3 class="fw-normal ">{{ formName }}</h3>
+                </div>
+                <div class="card-body">
+                    <form class="" method="POST">
+                        {% csrf_token %}
+                        {% for field in edit_form %}
+                            <div class="fieldWrapper mb-3">
+                                {{ field.label_tag }} <br>{{ field }}
+                                {% if field.help_text %}
+                                <p class="help">{{ field.help_text|safe }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        <div class="d-flex justify-content-end">
+                            <button class="srg-btn-primary my-2 px-5">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

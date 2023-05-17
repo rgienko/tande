@@ -80,7 +80,7 @@
                                     {{ engagement.getParent }}<br>
                                     {{ engagement.getScope }}<br>
                                     {{ engagement.getFYE|date:'m/d/Y' }}<br>
-                                    {{ engagement.getTCBudget }}<br>
+                                    {{ engagement.getBudget }}<br>
                                     {{ engagement.engagement_hours.project_hours }}<br>
                                 </div>
                             </div>
@@ -120,7 +120,7 @@
                                             id="expense-modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
                                             data-bs-target="#complete-modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
                                             href="#complete-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
-                                            <i class="bi bi-check-circle"></i> {% if engagement.is_complete is True %}Open Project{% else %}Close Project{% endif %}
+                                            <i class="bi bi-check-circle"></i> {% if engagement.is_complete is True %}Open Project{% else %}Open Project{% endif %}
                                         </a>
                                     {% else %}
                                         <a type="button" class="text-decoration-none open-modal-button srg-btn-primary"

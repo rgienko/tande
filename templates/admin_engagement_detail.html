@@ -2,36 +2,74 @@
 
 {% block content %}
     <div class="row d-flex justify-content-evenly">
-        <div class="col-6 card rounded-4 shadow p-0">
-            <div class="card-header rounded-4 rounded-bottom-0 border-bottom-0 srg-bg-secondary">
-                <h3 class="fw-normal srg-header">Engagement Details</h3>
-            </div>
 
-            <div class="card-body">
-                <h5 class="fw-normal">ID: {{ engagement_instance.srg_id }}</h5>
-                <h5 class="fw-normal">TC: {{ engagement_instance.time_code }}</h5>
-                <h5 class="fw-normal">P#: {{ engagement_instance.provider }}</h5>
-                <h5 class="fw-normal">PT: {{ engagement_instance.parent }}</h5>
-                <h5 class="fw-normal">FY: {{ engagement_instance.fye|date:'m/d/Y' }}</h5>
+        <div class="col-6 card rounded-4 shadow border-0 p-0">
+
+            <div class="row d-flex justify-content-between rounded-4 p-0">
+                <div class="col-8 card border-0 p-0">
+                    <div class="card-header rounded-4 rounded-bottom-0 border-bottom-0 rounded-end-0 srg-bg-secondary pb-0">
+                        <h4 class="fw-normal srg-header">Engagement Details</h4>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="fw-normal">ID: {{ engagement_instance.srg_id }}</h5>
+                        <h5 class="fw-normal">TC: {{ engagement_instance.time_code }}</h5>
+                        <h5 class="fw-normal">P#: {{ engagement_instance.provider }}</h5>
+                        <h5 class="fw-normal">PT: {{ engagement_instance.parent }}</h5>
+                        <h5 class="fw-normal">FY: {{ engagement_instance.fye|date:'m/d/Y' }}</h5>
+                    </div>
+                </div>
+                <div class="col-4 card p-0 border-0">
+                    <div class="card-header rounded-4 rounded-bottom-0 border-bottom-0 rounded-start-0 srg-bg-secondary text-end pb-0">
+                        <h4 class="fw-normal srg-header">Engagement Actions</h4>
+                    </div>
+                    <div class="card-body text-end pt-0">
+                        {% if user.is_staff %}
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    <a class="srg-link" href="#" data-bs-toggle="modal" data-bs-target="#complete-modal">
+                                        <span class="fs-5 me-1">{% if engagement_instance.is_complete is True %}Open Project{% else %}Close Project{% endif %}</span>
+                                        <i class=" fs-5 bi bi-check-circle"></i>
+                                    </a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="{% url 'add-assignments' engagement_instance.engagement_id %}" class="srg-link">
+                                        <span class="fs-5 me-1">Assign Staff</span>
+                                        <i class="fs-5 bi bi-plus-square"></i>
+                                    </a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#add-hours-modal" class="srg-link">
+                                        <span class="fs-5 me-1">Record Hours</span>
+                                        <i class="fs-5 bi bi-clock"></i>
+                                    </a>
+                                </li>
+                                <li class="list-group-item">
+                                    <a href="#" data-bs-toggle="modal" data-bs-target="#add-hours-modal" class="srg-link">
+                                        <span class="fs-5 me-1">Record Expense</span>
+                                        <i class="fs-5 bi bi-currency-dollar"></i>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        {% else %}
+                        {% endif %}
+                    </div>
+                </div>
             </div>
 
         </div>
         <div class="col-5 card p-0 shadow rounded-4">
-            <div class="card-header srg-bg-secondary rounded-4 rounded-bottom-0 border-bottom-0">
-                <h3 class="fw-normal srg-header">Engagement Actions</h3>
+            <div class="card-header srg-bg-secondary rounded-4 rounded-bottom-0 border-bottom-0 pb-0">
+                <h4 class="fw-normal srg-header">Engagement Notes</h4>
             </div>
             <div class="card-body">
-                {% if user.is_staff %}
-                <a class="srg-link" href="#" data-bs-toggle="modal" data-bs-target="#complete-modal">
-                    <i class=" fs-5 bi bi-check-circle"></i>
-                    <span class="ms-2 fs-5">{% if engagement_instance.is_complete is True %}Open Project{% else %}Close Project{% endif %}</span>
-                </a>
-                <a href="{% url 'add-assignments' engagement_instance.engagement_id %}" class="srg-link ms-4">
-                    <i class="fs-5 bi bi-plus-square"></i>
-                    <span class="ms-2 fs-5">Assign Staff</span>
-                </a>
-                {% else %}
-                {% endif %}
+                 <form method="POST">
+                    {% csrf_token %}
+                    <textarea class="form-control bg-white text-dark" id="save_notes" name="save_notes" style="min-height: 150px;max-height: 175px">{{ engagement_instance.notes }}</textarea>
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <input type="submit" class="srg-btn-primary mt-2 px-5" value="Save" />
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -41,11 +79,22 @@
     <div class="row d-flex justify-content-evenly my-5">
         <div class="col-2 rounded-4 text-center shadow p-0">
             <div class="card rounded-4 text-center border-0">
-                <div class="card-header srg-bg-primary text-light rounded-4 rounded-bottom-0 border-bottom-0">
-                    <h1 class="fw-normal">Hours</h1>
+                <div class="card-header srg-bg-secondary text-light rounded-4 rounded-bottom-0 border-bottom-0">
+                    <h1 class="fw-normal">Admin Hours</h1>
                 </div>
                 <div class="card-body p-3">
-                    <h1 class="fw-normal display-5 srg-header">{{ engagement_hours.ehours }}</h1>
+                    <h1 class="fw-normal display-5 srg-header-secondary">{{ non_billable_engagement_hours.ehours }}</h1>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-2 rounded-4 text-center shadow p-0">
+            <div class="card rounded-4 text-center border-0">
+                <div class="card-header srg-bg-primary text-light rounded-4 rounded-bottom-0 border-bottom-0">
+                    <h1 class="fw-normal">Billable Hours</h1>
+                </div>
+                <div class="card-body p-3">
+                    <h1 class="fw-normal display-5 srg-header">{{ billable_engagement_hours.ehours }}</h1>
                 </div>
 
             </div>
@@ -76,8 +125,8 @@
 
     <div class="row d-flex justify-content-evenly mt-4">
         <div class="col-6 card rounded-4 p-0 shadow">
-            <div class="card-header srg-bg-secondary rounded-4 rounded-bottom-0 border-bottom-0">
-                <h3 class="fw-normal srg-header">Hours By Employee</h3>
+            <div class="card-header srg-bg-secondary rounded-4 rounded-bottom-0 border-bottom-0 pb-0">
+                <h4 class="fw-normal srg-header">Hours By Employee</h4>
             </div>
 
             <script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
@@ -86,11 +135,19 @@
                 const config = {
                     type: 'bar',
                     data: {
-                        labels: [{% for emp in engagement_hours_by_employee %}'{{ emp.employee__user__username|safe }}', {% endfor %}],
+                        labels: [{% for emp in engagement_assignments %}'{{ emp.assignee__username|safe }}', {% endfor %}],
                         datasets: [{
-                            backgroundColor: [{% for emp in engagement_hours_by_employee %}'rgb{{ emp.color|safe }}', {% endfor %}],
-                            borderColor: [{% for emp in engagement_hours_by_employee %}'rgb{{ emp.color|safe }}', {% endfor %}],
-                            data: [{% for emp in engagement_hours_by_employee %}{{ emp.emp_hours }}, {% endfor %}],
+                            label: 'Billable',
+                            backgroundColor: ['rgb(2,48,140)'],
+                            borderColor: ['rgb(2,48,140)'],
+                            data: [{% for emp in engagement_assignments %}{{ emp.billable_hours.bhours }}, {% endfor %}],
+                            fill: false
+                        },
+                        {
+                            label: 'Non-Billable',
+                            backgroundColor: ['rgb(217,217,217)'],
+                            borderColor: ['rgb(217,217,217)'],
+                            data: [{% for emp in engagement_assignments %}{{ emp.non_billable_hours }}, {% endfor %}],
                             fill: false
                         }]
                     },
@@ -98,10 +155,16 @@
                         indexAxis:'y',
                         plugins: {
                           legend: {
-                              display: false
+                              display: true
                           }
                         },
                         scales: {
+                            x: {
+                                stacked:true
+                            },
+                            y: {
+                                stacked:true
+                            },
                             yAxes: [{
                                 ticks: {
                                     fontColor: "black",
@@ -131,21 +194,32 @@
         </div>
 
         <div class="col-5 card p-0 rounded-4 shadow">
-            <div class="card-header srg-bg-secondary border-bottom-0 rounded-4 rounded-bottom-0">
-                <h3 class="fw-normal srg-header">Engagement Notes</h3>
+            <div class="card-header srg-bg-secondary border-bottom-0 rounded-4 rounded-bottom-0 pb-0">
+                <h4 class="fw-normal srg-header">Timesheet vs To-Do</h4>
             </div>
             <div class="card-body">
-                 <form method="POST">
-                    {% csrf_token %}
-                    <textarea class="form-control bg-white text-dark" id="save_notes" name="save_notes" style="min-height: 300px;max-height: 175px">{{ engagement_instance.notes }}</textarea>
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <input type="submit" class="srg-btn-primary mt-4 px-5" value="Save" />
-                    </div>
-                </form>
+                 <table class="table">
+                     <thead>
+                        <tr>
+                            <th>Employee</th>
+                            <th>TS Hours</th>
+                            <th>TD Hours</th>
+                            <th>Variance</th>
+                        </tr>
+                     </thead>
+                     {% for emp in engagement_assignments %}
+                         <tr>
+                            <td>{{ emp.assignee__username }}</td>
+                            <td>{{ emp.billable_hours.bhours }}</td>
+                            <td>{{ emp.engagement_todo_hours }}</td>
+                            <td>{{ emp.tstd_variance }}</td>
+                         </tr>
+                     {% endfor %}
+                 </table>
             </div>
-
         </div>
     </div>
+
 
     <div class="modal fade" id="complete-modal" tabindex="-1" aria-labelledby="complete-modal" aria-hidden="true">
         <div class="modal-dialog" id="modal">
@@ -160,6 +234,34 @@
                         <p class="">Are you sure you want to complete this engagement?</p>
                         {% endif %}
                         <button class="srg-btn-primary my-2" id="confirm-button" name="confirm-button">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add-hours-modal" tabindex="-1" aria-labelledby="add-hours-modal" aria-hidden="true">
+        <div class="modal-dialog" id="modal">
+            <div class="modal-content">
+                <div class="modal-header srg-bg-primary text-light fs-4">
+                    Record Hours
+                </div>
+                <div class="modal-body">
+                    ID: <span id="object-id-{{ engagement_instance }}">{{ engagement_instance }}</span>
+                    <form class="" method="POST">
+                        {% csrf_token %}
+                            <label for="my-input-{{ engagement_instance }}">Engagement:</label><br>
+                            <input name="engagement-input" type="text" id="my-input-{{ engagement_instance }}" value="{{ engagement_instance }}"/><br>
+                        {% for field in add_time_form %}
+                            <div class="fieldWrapper mb-3">
+                                {{ field.label_tag }} <br>{{ field }}
+                                {% if field.help_text %}
+                                <p class="help">{{ field.help_text|safe }}</p>
+                                {% endif %}
+                            </div>
+
+                        {% endfor %}
+                        <button class="srg-btn-primary my-2" id="add-hours-button" name="add-hours-button">Add Hours</button>
                     </form>
                 </div>
             </div>

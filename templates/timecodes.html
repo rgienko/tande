@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="row d-flex justify-content-between align-items-end pt-4 pb-2">
+        <div class="col-6 srg-header d-flex align-items-center">
+            <h1 class="fw-normal m-0">Time Codes</h1>
+        </div>
+        <div class="col-6 text-end srg-header d-flex align-items-end justify-content-end">
+            <h4 class="fw-normal m-0"><i class="bi bi-plus-square"></i> Add New Time Code</h4>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12 overflow-auto">
+            <div class="card shadow rounded-4 border-0">
+                <table class="table">
+                    <caption>Current Timesheet Entries</caption>
+                    <thead class="border-none">
+                        <tr class="text-center srg-bg-primary text-light">
+                            <th class="border-0" style="border-top-left-radius: 1rem">Time Code</th>
+                            <th>Description</th>
+                            <th>Budget</th>
+                            <th style="border-top-right-radius: 1rem">Actions</th>
+                        </tr>
+                    </thead>
+                    {% for tc in time_codes %}
+                        <tr class="text-center align-middle">
+                            <td class="border">{{ tc.time_code }}</td>
+                            <td class="text-start border">{{ tc.time_code_desc}}</td>
+                            <td class="border">{{ tc.time_code_hours }}</td>
+                            <td class="border text-center">
+                                <a href="{% url 'edit-timecode' tc.time_code %}" class="">
+                                    <i class="fs-5 bi bi-pencil-square "></i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock %}

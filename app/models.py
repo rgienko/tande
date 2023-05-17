@@ -111,6 +111,17 @@ class Assignments(models.Model):
     def getTCBudget(self):
         return str(self.engagement.time_code.time_code_hours)
 
+    def getBudget(self):
+        return str(self.engagement.budget_hours)
+
+
+class TimeType(models.Model):
+    time_type_id = models.CharField(max_length=1, primary_key=True)
+    time_type_name = models.CharField(max_length=15)
+
+    def __str__(self):
+        return self.time_type_name
+
 
 class Time(models.Model):
     timesheet_id = models.AutoField(primary_key=True)
@@ -122,6 +133,7 @@ class Time(models.Model):
     # time_code = models.ForeignKey(TblTimeCode, on_delete=models.CASCADE)
     hours = models.DecimalField(max_digits=4, decimal_places=2)
     # type_id = models.ForeignKey(TblTypes, on_delete=models.CASCADE)
+    time_type_id = models.ForeignKey(TimeType, on_delete=models.CASCADE, default='B')
     # fye = models.DateField(null=True, blank=True)
     note = models.TextField(max_length=500, null=True, blank=True)
 

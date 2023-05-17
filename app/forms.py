@@ -17,6 +17,7 @@ class EngagementForm(forms.ModelForm):
             'start_date': DatePickerInput
         }
 
+
 class CompleteEngagementForm(forms.ModelForm):
     class Meta:
         model = Engagement
@@ -39,11 +40,12 @@ class TimeForm(forms.ModelForm):
     class Meta:
         model = Time
 
-        fields = ['date', 'hours', 'note']
+        fields = ['date', 'hours', 'time_type_id', 'note']
 
         labels = {
             'date': _('Date'),
             'hours': _('Hours'),
+            'time_type_id': _('Type'),
             'note': _('Note')
         }
 
@@ -76,7 +78,7 @@ class NewTimeCodeForm(forms.ModelForm):
     class Meta:
         model = Timecode
 
-        fields = ['time_code','time_code_desc', 'time_code_hours']
+        fields = ['time_code', 'time_code_desc', 'time_code_hours']
 
         labels = {
             'time_code': _('Time Code'),
