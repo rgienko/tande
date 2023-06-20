@@ -24,8 +24,8 @@
         </div>
     </div>
 
-    <div class="row mt-4" role="tabpanel">
-        <div class="col-auto overflow-auto" id="tablist" role="tablist" style="max-height:850px">
+    <div class="row mt-4 d-flex" role="tabpanel">
+        <div class="col-lg-2 col-md-3 overflow-auto card shadow-sm" id="tablist" role="tablist" style="max-height:850px">
             <div class="">
                 <span class="srg-header fs-3">My Engagements</span> <br>
                 <input class="search-box mt-2" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for systems.." title="Type in a name">
@@ -48,8 +48,8 @@
 
         <script src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
 
-        <div class="col-lg-9 col-md-12 col-sm-8 ms-1 border-start overflow-auto" style="max-height:850px">
-            <div class="tab-content" id="nav-tabContent">
+        <div class="col-lg-10 col-md-9 col-sm-8 overflow-auto" style="min-height:850px;max-height:850px">
+            <div class="tab-content card shadow-sm p-4" id="nav-tabContent" style="min-height:850px;max-height:850px">
                 {% for parent in all_parents %}
                     <div class="tab-pane" id="list-{{ parent.parent_id }}" role="tabpanel" aria-labelledby="list-{{ parent.parent_id }}-list">
                         <span class="srg-header fs-3">{{ parent.parent_name }} Engagements</span> <br>

@@ -24,68 +24,97 @@
         </div>
     </div>
 
-    <div class="row mt-4">
-        <div class="col-lg-4 col-md-12 col-sm-4 overflow-auto" id="list-tab" role="tablist" style="max-height:850px">
-            <div class="">
-                <span class="srg-header fs-3">My Engagements</span> <br>
-                <input class="search-box mt-2" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for engagements.." title="Type in a name">
+    <div class="row d-flex mt-2 gx-2 justify-content-between" style="min-height:85%;max-height:1024px">
+        <div class="col-lg-7 col-md-12 col-sm-4 overflow-auto card shadow-sm rounded-4 rounded-end-0 p-0 border-0" id="list-tab" role="tablist">
+            <div class="d-flex justify-content-between card-header srg-bg-secondary rounded-end-0">
+                <span class="srg-header fs-3">My Engagements</span>
+                <input class="search-box" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for engagements.." title="Type in a name">
             </div>
-            <table class="table table-hover" id="table">
+            <div class="card-body pt-0">
+                <table class="table table-hover mt-2" id="table">
                 <thead>
                     <tr>
-                        <th data-field="engagement"></th>
+                        <th data-field="engagement">Engagement</th>
+                        <th>Provider</th>
+                        <th>Scope</th>
+                        <th>FYE</th>
                     </tr>
                 </thead>
                 {% for engagement in all_engagements %}
                     <tr>
                         <td>
-                            <p>
-                            <a class="srg-link" role="tab" id="list-{{ engagement.engagement }}-list"
-                                                    data-bs-toggle="list"
-                                                    aria-controls="{{ engagement.engagement }}"
-                                                    href="#list-{{ engagement.engagement }}">
+                            <a class="srg-link" role="tab"
+                                id="list-{{ engagement.engagement }}-list"
+                                data-bs-toggle="list"
+                                aria-controls="{{ engagement.engagement }}"
+                                href="#list-{{ engagement.engagement }}">
                                 {{ engagement.engagement }}
-                                </a><br>
-                            {{ engagement.getProvider }}<br>
+                            </a>
+                        </td>
+                        <td>
+
+                            {{ engagement.getProvider }}
+                        </td>
+                        <td>
                             {{ engagement.getScope }}<br>
-                            FYE: {{ engagement.getFYE|date:'m/d/Y' }}
-                            </p>
+                        </td>
+                        <td>
+                            {{ engagement.getFYE|date:'m/d/Y' }}
                         </td>
                     </tr>
 
                 {% endfor %}
             </table>
+            </div>
         </div>
 
-        <div class="col-lg-8 col-md-12 col-sm-8 border-start">
-            <span class="srg-header fs-3">Engagement Details</span>
+        <div class="col-lg-5 col-md-12 col-sm-4 overflow-auto card rounded-4 rounded-start-0 p-0 border-0">
+            <div class="card-header srg-bg-secondary rounded-start-0">
+                <span class="srg-header fs-3">Engagement Details</span>
+            </div>
 
-            <div class="tab-content" id="nav-tabContent">
+            <div class="card-body border-0">
+                <div class="tab-content" id="nav-tabContent">
                 {% for engagement in all_engagements %}
                     <div class="tab-pane" id="list-{{ engagement.engagement }}" role="tabpanel" aria-labelledby="list-{{ engagement.engagement }}-list">
-                        <div class="card border shadow-sm p-2 srg-bg-secondary rounded">
-                            <div class="row">
-                                <div class="col-xxl-2 col-xl-3 col-lg-3 col-md-3 fw-bolder">
-                                    Engagement ID:<br>
-                                    Provider:<br>
-                                    Parent:<br>
-                                    Scope:<br>
-                                    Fiscal Year:<br>
-                                    Hours Budget:<br>
-                                    Hours Recorded:<br>
-                                </div>
-                                <div class="col-xxl-10 col-xl-9 col-lg-9 col-md-9">
-                                    {{ engagement.engagement}}<br>
-                                    {{ engagement.getProvider }}<br>
-                                    {{ engagement.getParent }}<br>
-                                    {{ engagement.getScope }}<br>
-                                    {{ engagement.getFYE|date:'m/d/Y' }}<br>
-                                    {{ engagement.getBudget }}<br>
-                                    {{ engagement.engagement_hours.project_hours }}<br>
-                                </div>
+                        <div class="card border p-0 rounded-4 shadow-sm">
+                            <div class="card-header srg-bg-secondary rounded-4 rounded-bottom-0">
+                                <span class="srg-header fs-5">Engagement: {{ engagement.engagement}}</span>
                             </div>
-
-                            <div class="my-3">
+                            <div class="card-body pb-0">
+                                <table class="table table-sm table-border-less">
+                                    <thead>
+                                        <tr></tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th scope="row">Provider:</th>
+                                            <td>{{ engagement.getProvider }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Parent:</th>
+                                            <td>{{ engagement.getParent }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Scope:</th>
+                                            <td>{{ engagement.getScope }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Fiscal Year:</th>
+                                            <td>{{ engagement.getFYE|date:'m/d/y' }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Hours Budget:</th>
+                                            <td>{{ engagement.getBudget }}</td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">Hours Recorded:</th>
+                                            <td>{{ engagement.engagement_hours.project_hours }}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="bg-transparent card-footer">
                                 {% if engagement.is_complete is True %}
                                     {% if user.is_staff %}
                                         <a type="button" class="text-decoration-none srg-link"
@@ -116,11 +145,18 @@
                                             <i class="bi bi-person-add"></i> Assign
                                         </a>
                                         -->
+                                         <a type="button" class="text-decoration-none open-modal-button srg-btn-secondary"
+                                           id="todo-modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
+                                           data-bs-target="#todo-modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
+                                           href="#todo-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
+                                                <i class="bi bi-check2-circle"></i> Add to To-Do List
+                                        </a>
+
                                         <a type="button" class="text-decoration-none srg-link"
                                             id="expense-modal-{{ engagement.engagement }}-modal" data-bs-toggle="modal"
                                             data-bs-target="#complete-modal-{{ forloop.counter }}" data-id="{{ engagement.engagement }}"
                                             href="#complete-modal-{{ forloop.counter }}-modal" aria-controls="{{ engagement.engagement }}">
-                                            <i class="bi bi-check-circle"></i> {% if engagement.is_complete is True %}Open Project{% else %}Open Project{% endif %}
+                                            <i class="bi bi-check-circle"></i> {% if engagement.is_complete is True %}Open Project{% else %}Close Project{% endif %}
                                         </a>
                                     {% else %}
                                         <a type="button" class="text-decoration-none open-modal-button srg-btn-primary"
@@ -140,27 +176,34 @@
                             </div>
                         </div>
 
-                        <div class="shadow-sm mb-5 rounded mt-2 border">
-                            <span class="srg-header fs-3 ps-1">Engagement Hours</span>
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Employee</th>
-                                        <th scope="col">Hours</th>
-                                        <th scope="col">Rate</th>
-                                    </tr>
-                                </thead>
-                                {% for entry in engagement.engagement_time_sheet_entries %}
-                                    <tr>
-                                        <td>{{ entry.employee__user__username }}</td>
-                                        <td>{{ entry.engagement_emp_hours }}</td>
-                                        <td>{{ entry.employee__rate }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </table>
+                        <div class="card shadow-sm mb-5 rounded-4 mt-4">
+                            <div class="card-header srg-bg-secondary rounded-4 rounded-bottom-0">
+                                <span class="srg-header fs-5 ps-1">Hours By Employee</span>
+                            </div>
+
+                            <div class="card-body py-0">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Employee</th>
+                                            <th scope="col">Hours</th>
+                                            <th scope="col">Rate</th>
+                                        </tr>
+                                    </thead>
+                                    {% for entry in engagement.engagement_time_sheet_entries %}
+                                        <tr>
+                                            <td>{{ entry.employee__user__username }}</td>
+                                            <td>{{ entry.engagement_emp_hours }}</td>
+                                            <td>{{ entry.employee__rate }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </table>
+                            </div>
+
                         </div>
                     </div>
                 {% endfor %}
+            </div>
             </div>
         </div>
 
@@ -217,6 +260,32 @@
 
                                 {% endfor %}
                                 <button class="srg-success-button my-2">Add Expense</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="todo-modal-{{ forloop.counter }}" tabindex="-1" aria-labelledby="todo-modal-{{ engagement.engagement }}-modal" aria-hidden="true">
+                <div class="modal-dialog" id="modal">
+                    <div class="modal-content">
+                        <div class="modal-header srg-bg-secondary srg-header fs-5">
+                            Add Engagement To To-Do List
+                        </div>
+                        <div class="modal-body">
+                            <form class="" method="POST">
+                                {% csrf_token %}
+                                    <label for="my-input-{{ forloop.counter }}">Engagement:</label><br>
+                                    <input name="engagement-input" type="text" id="my-input-{{ forloop.counter }}" value="{{ engagement.engagement }}"/><br>
+                                {% for field in todo_form %}
+                                    <div class="fieldWrapper my-3">
+                                        {{ field.label_tag }} {{ field }}
+                                        {% if field.help_text %}
+                                        <p class="help">{{ field.help_text|safe }}</p>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                                <button class="srg-btn-primary my-2">Add to To-Do List</button>
                             </form>
                         </div>
                     </div>
@@ -282,20 +351,22 @@
     <script>
         function myFunction() {
           // Declare variables
-            let input, filter, ul, li, a, i, txtValue;
+            let input, filter, tbl, trow, td, i, txtValue;
             input = document.getElementById('myInput');
             filter = input.value.toUpperCase();
-            ul = document.getElementById("table");
-            li = ul.getElementsByTagName('td');
+            tbl = document.getElementById("table");
+            trow = tbl.getElementsByTagName('tr');
 
           // Loop through all list items, and hide those who don't match the search query
-            for (i = 0; i < li.length; i++) {
-                a = li[i].getElementsByTagName("p")[0];
-                txtValue = a.textContent || a.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    li[i].style.display = "";
-                } else {
-                    li[i].style.display = "none";
+            for (i = 0; i < trow.length; i++) {
+                td = trow[i].getElementsByTagName("td")[0];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        trow[i].style.display = "";
+                    } else {
+                        trow[i].style.display = "none";
+                    }
                 }
             }
         }

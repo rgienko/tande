@@ -1,0 +1,247 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+    <div class="row d-flex justify-content-between srg-bg-secondary">
+        <div class="col-6 srg-header">
+            {% if user.is_staff %}
+                <h3 class="fw-normal">{{ user.first_name }}'s Admin Dashboard V 2.0</h3>
+                <h5 class="fw-normal">Today: {{ today|date:'D m/d/Y' }}</h5>
+                <h5 class="fw-normal">Week: {{ week_beg|date:'D m/d/Y' }} - {{ week_end|date:'D m/d/Y' }}</h5>
+            {% else %}
+                <h3 class="fw-normal">{{ user.first_name }}'s Dashboard</h3>
+                <h5 class="fw-normal">Today: {{ today|date:'D m/d/Y' }}</h5>
+                <h5 class="fw-normal">Week: {{ week_beg|date:'D m/d/Y' }} - {{ week_end|date:'D m/d/Y' }}</h5>
+            {% endif %}
+        </div>
+        <div class="col-6 d-flex align-items-center justify-content-end">
+            {% if user.is_staff %}
+                <a href="{% url 'create-engagement' %}" class="srg-link ">
+                    <i class="fs-5 bi bi-plus-square"></i>
+                    <span class="ms-2 fs-5"> New Engagement</span>
+                </a>
+            {% else %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mt-4 d-flex justify-content-around" role="tabpanel">
+        <div class="col-lg-3 col-md-3 overflow-auto card shadow-sm" id="tablist" role="tablist" style="max-height:850px">
+            <div class="">
+                <span class="srg-header fs-3">My Engagements</span> <br>
+                <input class="search-box mt-2" type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for systems.." title="Type in a name">
+            </div>
+            <div class="list-group mt-2" role="tablist">
+                <ul id="parentList" class="list-group list-group-flush">
+                    {% for parent in all_parents %}
+                        <li class="list-group-item">
+                            <a class="srg-link" role="tab" id="list-{{ parent.parent_id }}-list"
+                                data-bs-toggle="list" aria-controls="{{ parent.parent_id }}"
+                                href="#list-{{ parent.parent_id }}">{{ parent.parent_name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <link href="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.css" rel="stylesheet">
+        <script src="https://unpkg.com/bootstrap-table@1.21.4/dist/bootstrap-table.min.js"></script>
+
+        <div class="col-lg-9 px-2">
+            <div class="tab-content card shadow-sm border-0" id="nav-tabContent">
+                {% for parent in all_parents %}
+                    <div class="tab-pane srg-border px-4" id="list-{{ parent.parent_id }}" role="tabpanel" aria-labelledby="list-{{ parent.parent_id }}-list">
+                        <div class="d-flex justify-content-between align-items-baseline px-4 border">
+                            <span class="srg-header fs-3">{{ parent.parent_name }} Engagements</span>
+                            <input class="search-box" type="text" id="myInput2" onkeyup="myFunction2()" placeholder="Search for engagements.." title="Type in a name">
+                        </div>
+
+                        <div class="accordion accordion-flush p-4" id="accordionExample">
+                            {% for engagement in parent.parent_engagements %}
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header">
+                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#{{ engagement.srg_id }}" aria-expanded="true" aria-controls="{{ engagement.srg_id }}">
+                                            {{ engagement.srg_id }}: {{ engagement.provider }} {{ engagement.time_code }} {{ engagement.fye|date:'m/d/Y' }}
+                                        </button>
+                                    </h2>
+                                    <div id="{{ engagement.srg_id }}" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+
+                                            <div class="card mb-4">
+                                                <div class="card-header srg-bg-secondary srg-header">
+                                                    Engagement Details
+                                                </div>
+                                                <div class="card-body">
+                                                    <span class="fw-bold">ID:</span> {{ engagement.srg_id}}<br>
+                                                    <span class="fw-bold">Provider:</span> {{ engagement.provider }}<br>
+                                                    <span class="fw-bold">Scope:</span> {{ engagement.time_code }}<br>
+                                                    <span class="fw-bold">Year:</span> {{ engagement.fye|date:'m/d/Y' }} <br>
+                                                    <span class="fw-bold">Status:</span> {{ engagement.is_complete }}
+                                                </div>
+                                            </div>
+
+
+                                            <div class="card">
+                                                <div class="card-header bg-secondary srg-header">
+                                                    Hours Breakdown
+                                                </div>
+                                                <div class="row d-flex justify-content-start py-4 px-1">
+                                                    <div class="col-3">
+                                                        <div class="card text-center fs-6">
+                                                            <div class="card-header bg-secondary srg-header">
+                                                                Non-Billable
+                                                            </div>
+                                                            <div class="card-body fs-5">
+                                                                {{ engagement.engagement_hours.project_hours }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="card text-center fs-6">
+                                                            <div class="card-header bg-secondary srg-header">
+                                                                Billable
+                                                            </div>
+                                                            <div class="card-body fs-5">
+                                                                {{ engagement.engagement_hours.project_hours }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="card text-center fs-6">
+                                                            <div class="card-header bg-secondary srg-header">
+                                                                Total
+                                                            </div>
+                                                            <div class="card-body fs-5">
+                                                                {{ engagement.budget_hours }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <div class="card text-center fs-6">
+                                                            <div class="card-header bg-secondary srg-header">
+                                                                Variance
+                                                            </div>
+                                                            <div class="card-body fs-5">
+                                                                {{ engagement.budget_hours }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="card my-4">
+                                                <div class="card-header bg-secondary srg-header">
+                                                    Hours Comparison
+                                                </div>
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Employee</th>
+                                                            <th>TS Hours</th>
+                                                            <th>TD Hours</th>
+                                                            <th>Variance</th>
+                                                        </tr>
+                                                    </thead>
+                                                     {% for emp in engagement.engagement_staff %}
+                                                         <tr>
+                                                            <td>{{ emp.assignee }}</td>
+                                                            <td>{{ emp.billable_hours }}</td>
+                                                            <td>{{ emp.engagement_todo_hours }}</td>
+                                                            <td>{{ emp.variance }}</td>
+                                                         </tr>
+                                                    {% endfor %}
+                                                </table>
+                                            </div>
+                                            <div class="card">
+                                                <div class="card-header bg-secondary srg-header">
+                                                    Actions
+                                                </div>
+                                                <div class="card-body">
+                                                    <a class="srg-btn-primary" href="{% url 'admin-engagement-detail' engagement.engagement_id %}">Detailed Report</a>
+                                                    <a class="srg-btn-primary" href="{% url 'edit-engagement' engagement.engagement_id %}">Edit Engagement</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("").hover(function () {
+            $(this).css("color", "#7178A1");
+            $(this).css("text-decoration", "underline");
+        }, function () {
+            $(this).css("color", "");
+            $(this).css("text-decoration", "none");
+        });
+    });
+</script>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('a[data-bs-toggle="list"]').on('shown.bs.tab', function (e) {
+            $(e.target).css("border-left-style", "solid");
+            $(e.target).css("border-color", "#02308C");
+            $(e.target).css("padding-left", "5px");
+            $(e.relatedTarget).css("border-left-style", "");
+            $(e.relatedTarget).css("padding-left", "");
+        })
+    })
+</script>
+
+     <script>
+        function myFunction() {
+          // Declare variables
+            let input, filter, ul, li, a, i, txtValue;
+            input = document.getElementById('myInput');
+            filter = input.value.toUpperCase();
+            ul = document.getElementById("parentList");
+            li = ul.getElementsByTagName('li');
+
+          // Loop through all list items, and hide those who don't match the search query
+            for (i = 0; i < li.length; i++) {
+                a = li[i].getElementsByTagName("a")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "block";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+
+    <script>
+        function myFunction2() {
+          // Declare variables
+            let input, filter, ul, li, a, i, txtValue;
+            input = document.getElementById('myInput2');
+            filter = input.value.toUpperCase();
+            ul = document.getElementById("accordionExample");
+            li = ul.getElementsByTagName('h2');
+
+          // Loop through all list items, and hide those who don't match the search query
+            for (i = 0; i < li.length; i++) {
+                a = li[i].getElementsByTagName("button")[0];
+                txtValue = a.textContent || a.innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    li[i].style.display = "block";
+                } else {
+                    li[i].style.display = "none";
+                }
+            }
+        }
+
+    </script>
+
+
+{% endblock %}

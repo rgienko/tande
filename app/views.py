@@ -148,6 +148,25 @@ def resetPassword(request):
     return render(request, 'password_reset.html', context)
 
 
+def get_user_assignments(userid):
+    user_engagements = Assignments.objects.select_related('engagement').filter(assignee=userid)
+    # all_engagements = get_employee_assignments(self.request.user.id)
+
+    for engagement in user_engagements:
+        engagement_time_sheet_entries = Time.objects.filter(engagement=engagement.engagement_id)
+
+        # engagement.staff = Assignments.objects.filter(engagement=engagement.engagement_id)
+
+        engagement.engagement_time_sheet_entries = engagement_time_sheet_entries.values('employee__user__username',
+                                                                                        'employee__rate').annotate(
+            engagement_emp_hours=Sum('hours')).order_by('-engagement_emp_hours')
+
+        engagement.engagement_hours = engagement_time_sheet_entries.aggregate(
+            project_hours=Sum('hours'))
+
+    return user_engagements
+
+
 class Dashboard(LoginRequiredMixin, TemplateView):
     login_url = '/login'
     redirect_field_name = 'dashboard/'
@@ -158,39 +177,23 @@ class Dashboard(LoginRequiredMixin, TemplateView):
     week_end = week_beg + timedelta(days=5)
     thirty = date.today() - timedelta(days=30)
 
+    from asgiref.sync import sync_to_async
+
     def get(self, *args, **kwargs):
+        # all_engagements = get_user_assignments(self.request.user.id)
+
+        # cache.set('my_key', all_engagements, 30)
+        if cache.get("my_key") is None:
+            print("New Query")
+            all_engagements = get_user_assignments(self.request.user.id)
+            cache.set('my_key', all_engagements, timeout=300)
+        else:
+            print("Cache")
+            all_engagements = cache.get("my_key")
+
         add_time_form = TimeForm(self.request.POST)
         add_expense_form = ExpenseForm(self.request.POST)
         complete_engagement_form = CompleteEngagementForm(self.request.POST)
-
-        # cache_key = f'all_engagements_{self.request.user.id}'
-        # all_engagements = cache.get(cache_key)
-        # if all_engagements is None:
-
-        # if self.request.user.is_staff: all_engagements = Engagement.objects.all() else: all_engagements =
-        # Engagement.objects.raw( 'SELECT * FROM app_engagement JOIN app_assignments ON app_assignments.engagement_id
-        # = app_engagement.engagement_id WHERE app_assignments.assignee_id = {userid};'.format(
-        # userid=self.request.user.id))
-
-        all_engagements = Assignments.objects.select_related('engagement').filter(assignee=self.request.user.id)
-
-        for engagement in all_engagements:
-            engagement_time_sheet_entries = Time.objects.filter(engagement=engagement.engagement_id)
-
-            engagement_time_sheet_by_employee = engagement_time_sheet_entries.values('employee__user__username',
-                                                                                     'employee__rate').annotate(
-                engagement_emp_hours=Sum('hours')).order_by('-engagement_emp_hours')
-
-            engagement.staff = Assignments.objects.filter(engagement=engagement.engagement_id)
-
-            engagement.engagement_time_sheet_entries = engagement_time_sheet_by_employee
-
-            engagement_total_hours = engagement_time_sheet_entries.aggregate(
-                project_hours=Sum('hours'))
-
-            engagement.engagement_hours = engagement_total_hours
-
-        # cache.set(cache_key, all_engagements, timeout=30)
 
         context = {'today': self.today, 'week_beg': self.week_beg, 'week_end': self.week_end,
                    'all_engagements': all_engagements, 'add_time_form': add_time_form,
@@ -246,7 +249,7 @@ class Dashboard(LoginRequiredMixin, TemplateView):
 
 class AdminDashboard(LoginRequiredMixin, TemplateView):
     login_url = '/login'
-    template_name = 'admin_dashboard_v2.html'
+    template_name = 'admin_dashboard_v3.html'
 
     today = date.today()
     week_beg = today - timedelta(days=today.weekday())
@@ -262,20 +265,40 @@ class AdminDashboard(LoginRequiredMixin, TemplateView):
                                                                                                     '-engagement_id')
 
             for engagement in parent.parent_engagements:
+
                 engagement_time_sheet_entries = Time.objects.filter(engagement=engagement.engagement_id)
+                engagement_todo_entries = Todolist.objects.filter(engagement=engagement.engagement_id)
 
-                # engagement_time_sheet_by_employee = engagement_time_sheet_entries.values('employee__user__username',
-                #                                                                         'employee__rate').annotate(
-                #    engagement_emp_hours=Sum('hours')).order_by('-engagement_emp_hours')
-
-                # engagement.staff = Assignments.objects.filter(engagement=engagement.engagement_id)
-
-                # engagement.engagement_time_sheet_entries = engagement_time_sheet_by_employee
+                engagement.engagement_time_sheet_entries = engagement_time_sheet_entries.values(
+                    'employee__user__username',
+                    'employee__rate').annotate(
+                    engagement_emp_hours=Sum('hours')).order_by('-engagement_emp_hours')
 
                 engagement_total_hours = engagement_time_sheet_entries.aggregate(
                     project_hours=Sum('hours'))
 
                 engagement.engagement_hours = engagement_total_hours
+
+                engagement.engagement_staff = Assignments.objects.filter(engagement=engagement.engagement_id)
+
+                for staff in engagement.engagement_staff:
+                    staff.billable_hours = engagement_time_sheet_entries.filter(employee__user_id=staff.assignee).aggregate(
+                        bhours=Sum('hours'))
+
+                    if staff.billable_hours['bhours'] is None:
+                        staff.billable_hours = 0
+                    else:
+                        staff.billable_hours = staff.billable_hours['bhours']
+
+                    staff.engagement_todo_hours = engagement_todo_entries.filter(employee__user_id=staff.assignee).aggregate(
+                        tdhours=Sum('anticipated_hours'))
+
+                    if staff.engagement_todo_hours['tdhours'] is None:
+                        staff.engagement_todo_hours = 0
+                    else:
+                        staff.engagement_todo_hours = staff.engagement_todo_hours['tdhours']
+
+                    staff.variance = staff.engagement_todo_hours - staff.billable_hours
 
         context = {'today': self.today, 'week_beg': self.week_beg,
                    'week_end': self.week_end, 'all_parents': all_parents}
@@ -759,4 +782,3 @@ def editEngagement(request, pk):
     context = {'formName': 'Edit Engagement', 'edit_form': edit_form}
 
     return render(request, 'edit.html', context)
-
